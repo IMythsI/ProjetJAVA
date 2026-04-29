@@ -3,7 +3,7 @@ package modelPackage;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class CostumerOrder {
+public class Order {
     private Integer idOrder;
     private String comment;
     private Integer guestCount;
@@ -12,12 +12,12 @@ public class CostumerOrder {
     private LocalTime pickupTime;
     private String nameCustomer;
     private String telCustomer;
-    private Integer idTable;
+    private Table table;
 
-    public CostumerOrder(Integer idOrder, String comment, Integer guestCount,
-                         LocalDate orderDate, Boolean isTakeAway,
-                         LocalTime pickUpTime, String nameCustomer,
-                         String telCustomer, Integer idTable) {
+    public Order(Integer idOrder, String comment, Integer guestCount,
+                 LocalDate orderDate, Boolean isTakeAway,
+                 LocalTime pickUpTime, String nameCustomer,
+                 String telCustomer, Table table) {
         this.idOrder = idOrder;
         this.comment = comment;
         this.guestCount = guestCount;
@@ -26,7 +26,7 @@ public class CostumerOrder {
         this.pickupTime = pickUpTime;
         this.nameCustomer = nameCustomer;
         this.telCustomer = telCustomer;
-        this.idTable = idTable;
+        this.table = table;
     }
 
 }
