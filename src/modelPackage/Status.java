@@ -6,4 +6,11 @@ public class Status {
     public Status(String statuslabel) {
         this.statuslabel = statuslabel;
     }
+
+    @Override
+    public String toString() {
+        return "Status{" +
+                "statuslabel='" + statuslabel + '\'' +
+                '}';
+    }
 }

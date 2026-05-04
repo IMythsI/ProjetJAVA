@@ -10,4 +10,13 @@ public class Table {
         this.nbSeats = nbSeats;
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "Table{" +
+                "idTabel=" + idTabel +
+                ", nbSeats=" + nbSeats +
+                ", status=" + status +
+                '}';
+    }
 }

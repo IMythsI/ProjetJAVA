@@ -29,4 +29,18 @@ public class Order {
         this.table = table;
     }
 
+    @Override
+    public String toString() {
+        return "Order{" +
+                "idOrder=" + idOrder +
+                ", comment='" + comment + '\'' +
+                ", guestCount=" + guestCount +
+                ", orderDate=" + orderDate +
+                ", isTakeAway=" + isTakeAway +
+                ", pickupTime=" + pickupTime +
+                ", nameCustomer='" + nameCustomer + '\'' +
+                ", telCustomer='" + telCustomer + '\'' +
+                ", table=" + table +
+                '}';
+    }
 }
