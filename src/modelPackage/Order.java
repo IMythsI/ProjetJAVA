@@ -43,4 +43,40 @@ public class Order {
                 ", table=" + table +
                 '}';
     }
+
+    public Integer getIdOrder() {
+        return idOrder;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public Integer getGuestCount() {
+        return guestCount;
+    }
+
+    public LocalDate getOrderDate() {
+        return orderDate;
+    }
+
+    public Boolean getTakeAway() {
+        return isTakeAway;
+    }
+
+    public LocalTime getPickupTime() {
+        return pickupTime;
+    }
+
+    public String getNameCustomer() {
+        return nameCustomer;
+    }
+
+    public String getTelCustomer() {
+        return telCustomer;
+    }
+
+    public Table getTable() {
+        return table;
+    }
 }

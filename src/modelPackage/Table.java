@@ -19,4 +19,16 @@ public class Table {
                 ", status=" + status +
                 '}';
     }
+
+    public Integer getIdTabel() {
+        return idTabel;
+    }
+
+    public Integer getNbSeats() {
+        return nbSeats;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
 }

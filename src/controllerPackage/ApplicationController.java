@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public class ApplicationController {
     private OrderManager orderManager;
 
-    public ApplicationController(OrderManager orderManager) {
-        this.orderManager = orderManager;
+    public ApplicationController() {
+        orderManager  = new OrderManager();
     }
     public ArrayList<Order> getAllOrders() throws OrderException {
         return orderManager.getAllOrders();
