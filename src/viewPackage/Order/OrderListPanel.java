@@ -1,4 +1,4 @@
-package viewPackage;
+package viewPackage.Order;
 
 import controllerPackage.ApplicationController;
 import exceptionPackage.OrderException;

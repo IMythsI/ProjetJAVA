@@ -1,5 +1,7 @@
 package viewPackage;
 
+import viewPackage.Order.OrderListPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -41,8 +43,11 @@ public class MainJFrame extends JFrame {
         bookingMenu.add(new JMenuItem("New booking"));
 
         JMenu fileMenu = new JMenu("File");
+        JMenuItem mainItem = new JMenuItem("Main");
         JMenuItem exitItem = new JMenuItem("Exit");
+        mainItem.addActionListener(event -> showWelcomePanel());
         exitItem.addActionListener(event -> System.exit(0));
+        fileMenu.add(mainItem);
         fileMenu.add(exitItem);
 
         menuBar.add(fileMenu);
@@ -54,7 +59,7 @@ public class MainJFrame extends JFrame {
     }
 
     private void showWelcomePanel() {
-        setContentPane(new WelcomePanel());
+        setContentPane(new WelcomePanel(this));
         revalidate();
         repaint();
     }
