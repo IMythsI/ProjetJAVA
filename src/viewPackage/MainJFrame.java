@@ -1,15 +1,21 @@
 package viewPackage;
 
+import viewPackage.Dashboard.WaiterDashboardPanel;
 import viewPackage.Order.OrderListPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Stack;
 
 public class MainJFrame extends JFrame {
     private Container frameContainer;
 
+    private Stack<JPanel> navigationStack;
+
     public MainJFrame() {
         super("Restaurant Management");
+
+        navigationStack = new Stack<>();
 
         setBounds(100, 100, 1100, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -58,15 +64,46 @@ public class MainJFrame extends JFrame {
         return menuBar;
     }
 
-    private void showWelcomePanel() {
-        setContentPane(new WelcomePanel(this));
+    public void changePanel(JPanel panel) {
+        Component currentPanel = getContentPane();
+        if (currentPanel instanceof JPanel currentJPanel) {
+            navigationStack.push(currentJPanel);
+        }
+        setContentPane(panel);
         revalidate();
         repaint();
     }
 
-    private void showOrderListPanel() {
-        setContentPane(new OrderListPanel());
-        revalidate();
-        repaint();
+    public void goBack() {
+        if (!navigationStack.isEmpty()) {
+            JPanel previousPanel = navigationStack.pop();
+            setContentPane(previousPanel);
+            revalidate();
+            repaint();
+        }
+    }
+
+    private void showWelcomePanel() {
+        changePanel(new WelcomePanel(this));
+    }
+
+    public void showWaiterPanel() {
+        changePanel(new WaiterDashboardPanel(this));
+    }
+
+    public void showOrderListPanel() {
+        changePanel(new OrderListPanel(this));
+    }
+
+    public void showBookingListPanel() {
+        //changePanel(new BookingListPanel(this));
+    }
+
+    public void showTableListPanel() {
+        //changePanel(new RestaurantTableListPanel(this));
+    }
+
+    public void showAllergiesPanel() {
+        //changePanel(new RestaurantTableListPanel(this));
     }
 }

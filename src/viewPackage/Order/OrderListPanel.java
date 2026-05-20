@@ -3,25 +3,37 @@ package viewPackage.Order;
 import controllerPackage.ApplicationController;
 import exceptionPackage.OrderException;
 import modelPackage.Order;
+import viewPackage.AbstractPanel;
+import viewPackage.MainJFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class OrderListPanel extends JPanel {
+public class OrderListPanel extends AbstractPanel {
     private ApplicationController controller;
 
-    public OrderListPanel() {
+    public OrderListPanel(MainJFrame mainWindow) {
+        super(mainWindow);
+
         controller = new ApplicationController();
 
         setLayout(new BorderLayout());
-
         setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+
+        JButton backButton = createBackButton();
 
         JLabel titleLabel = new JLabel("Liste des commandes", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 26));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
-        add(titleLabel, BorderLayout.NORTH);
+
+        topPanel.add(backButton, BorderLayout.WEST);
+        topPanel.add(titleLabel, BorderLayout.CENTER);
+
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+
+        add(topPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 

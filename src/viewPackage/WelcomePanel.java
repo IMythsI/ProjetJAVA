@@ -101,13 +101,11 @@ public class WelcomePanel extends JPanel {
 
     private void openSelectedRole() {
         String selectedRole = (String) roleComboBox.getSelectedItem();
-        /*
         switch (selectedRole) {
             case "Serveur" -> mainWindow.showWaiterPanel();
-            case "Cuisine" -> mainWindow.showCookPanel();
-            case "Manager" -> mainWindow.showManagerPanel();
+            //case "Cuisine" -> mainWindow.showCookPanel();
+            //case "Manager" -> mainWindow.showManagerPanel();
         }
 
-         */
     }
 }
