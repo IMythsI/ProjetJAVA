@@ -46,7 +46,7 @@ public class OrderTableModel extends AbstractTableModel {
             case 5 -> order.getPickupTime();
             case 6 -> order.getNameCustomer();
             case 7 -> order.getTelCustomer();
-            case 8 -> order.getTable() == null ? null : order.getTable().getIdTabel();
+            case 8 -> order.getTable() == null ? null : order.getTable().getIdTable();
             default -> null;
         };
     }

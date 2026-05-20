@@ -38,8 +38,11 @@ public class OrderListPanel extends AbstractPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         JButton refreshButton = new JButton("Actualiser");
+        refreshButton.addActionListener(actionEvent -> loadOrder());
         JButton addButton = new JButton("Ajouter");
+        addButton.addActionListener(actionEvent -> mainWindow.showOrderFormPanel());
         JButton deleteButton = new JButton("Supprimer");
+        deleteButton.addActionListener(actionEvent -> {});
 
         buttonPanel.add(refreshButton);
         buttonPanel.add(addButton);
@@ -86,4 +89,6 @@ public class OrderListPanel extends AbstractPanel {
             remove(centerComponent);
         }
     }
+
+
 }

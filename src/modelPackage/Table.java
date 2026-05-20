@@ -20,7 +20,7 @@ public class Table {
                 '}';
     }
 
-    public Integer getIdTabel() {
+    public Integer getIdTable() {
         return idTabel;
     }
 
@@ -31,4 +31,5 @@ public class Table {
     public Status getStatus() {
         return status;
     }
+
 }

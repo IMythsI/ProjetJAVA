@@ -2,12 +2,10 @@ package dataAccessPackage.db;
 
 import dataAccessPackage.SingletonConnection;
 import dataAccessPackage.interfaces.OrderDataAccess;
-import exceptionPackage.ConnectionException;
-import exceptionPackage.OrderException;
-import modelPackage.Order;
-import modelPackage.Status;
-import modelPackage.Table;
+import exceptionPackage.*;
+import modelPackage.*;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -68,17 +66,77 @@ public class OrderDBAccess implements OrderDataAccess {
     }
 
     @Override
-    public void addOrder(Order order) throws OrderException {
+    public ArrayList<Order> getOrdersByTable(Integer idTable) throws OrderException {
+        ArrayList<Order> orders = new ArrayList<>();
 
+        String sql = """
+            SELECT idOrder, comment, guestCount, orderDate, isTakeAway,
+                   pickUpTime, nameCustomer, telCustomer, idTable
+            FROM CustomerOrder
+            WHERE idTable = ?
+            ORDER BY idOrder
+            """;
+
+        try (
+                Connection connection = SingletonConnection.getInstance();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, idTable);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Order order = new Order(
+                            resultSet.getInt("idOrder"),
+                            resultSet.getString("comment"),
+                            resultSet.getInt("guestCount"),
+                            resultSet.getDate("orderDate").toLocalDate(),
+                            resultSet.getBoolean("isTakeAway"),
+                            resultSet.getTime("pickUpTime") == null
+                                    ? null
+                                    : resultSet.getTime("pickUpTime").toLocalTime(),
+                            resultSet.getString("nameCustomer"),
+                            resultSet.getString("telCustomer"),
+                            null
+                    );
+
+                    orders.add(order);
+                }
+            }
+
+            return orders;
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new OrderException("Erreur lors du chargement des commandes de la table.", exception);
+        }
     }
 
     @Override
-    public void updateOrder(Order order) throws OrderException {
+    public BigDecimal getTotalAmountByTable(Integer idTable) throws OrderException {
+        String sql = """
+            SELECT COALESCE(SUM(lo.quantity * p.price), 0) AS totalAmount
+            FROM CustomerOrder co
+            INNER JOIN LineOrder lo ON co.idOrder = lo.idOrder
+            INNER JOIN Product p ON lo.productLabel = p.productLabel
+            WHERE co.idTable = ?
+            """;
 
+        try (
+                Connection connection = SingletonConnection.getInstance();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, idTable);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getBigDecimal("totalAmount");
+                }
+            }
+
+            return BigDecimal.ZERO;
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new OrderException("Erreur lors du calcul du total de la table.", exception);
+        }
     }
 
-    @Override
-    public void deleteOrder(Integer idOrder) throws OrderException {
-
-    }
 }

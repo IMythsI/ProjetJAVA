@@ -1,7 +1,10 @@
 package viewPackage;
 
+import modelPackage.Table;
 import viewPackage.Dashboard.WaiterDashboardPanel;
+import viewPackage.Order.OrderFormPanel;
 import viewPackage.Order.OrderListPanel;
+import viewPackage.Table.TableDetailPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +27,7 @@ public class MainJFrame extends JFrame {
         frameContainer = this.getContentPane();
         frameContainer.setLayout(new BorderLayout());
 
-        setJMenuBar(createMenuBar());
+        //setJMenuBar(createMenuBar());
         showWelcomePanel();
     }
 
@@ -87,20 +90,31 @@ public class MainJFrame extends JFrame {
         changePanel(new WelcomePanel(this));
     }
 
+    //Dashboard
     public void showWaiterPanel() {
         changePanel(new WaiterDashboardPanel(this));
     }
 
+    //Order
     public void showOrderListPanel() {
         changePanel(new OrderListPanel(this));
     }
 
-    public void showBookingListPanel() {
-        //changePanel(new BookingListPanel(this));
+    public void showOrderFormPanel() {
+        changePanel(new OrderFormPanel(this));
     }
 
-    public void showTableListPanel() {
-        //changePanel(new RestaurantTableListPanel(this));
+    public void showOrderFormTablePanel(Table table) {
+        changePanel(new OrderFormPanel(this, table));
+    }
+
+    //Table
+    public void showTableDetailPanel(Table table) {
+        changePanel(new TableDetailPanel(this, table));
+    }
+
+    public void showBookingListPanel() {
+        //changePanel(new BookingListPanel(this));
     }
 
     public void showAllergiesPanel() {

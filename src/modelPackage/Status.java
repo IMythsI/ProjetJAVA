@@ -13,4 +13,8 @@ public class Status {
                 "statuslabel='" + statuslabel + '\'' +
                 '}';
     }
+
+    public String getStatusLabel() {
+        return statuslabel;
+    }
 }
