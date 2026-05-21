@@ -22,7 +22,8 @@ public class OrderDBAccess implements OrderDataAccess {
                 FROM CustomerOrder co
                 LEFT JOIN RestaurantTable rt ON co.idTable = rt.idTable
                 LEFT JOIN Status s ON rt.statusLabel = s.statusLabel
-                ORDER BY co.idOrder
+                WHERE orderDate >= CURDATE()
+                ORDER BY orderDate ASC, idOrder ASC
                 """;
         try (Connection connection = SingletonConnection.getInstance();
              PreparedStatement preparedStatement = connection.prepareStatement(query);

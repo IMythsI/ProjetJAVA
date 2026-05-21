@@ -123,4 +123,8 @@ public class MainJFrame extends JFrame {
     public void showProductSelectionPanel(Table table) {
         changePanel(new ProductSelectionPanel(this, table));
     }
+
+    public void showOrderCardsPanel() {
+        changePanel(new OrderCardsPanel(this));
+    }
 }

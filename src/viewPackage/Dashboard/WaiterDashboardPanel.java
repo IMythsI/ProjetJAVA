@@ -145,7 +145,7 @@ public class WaiterDashboardPanel extends AbstractPanel {
         JPanel actionsPanel = new JPanel();
         actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.Y_AXIS));
 
-        actionsPanel.add(createActionButton("Voir les commandes", () -> mainWindow.showOrderListPanel()));
+        actionsPanel.add(createActionButton("Voir les commandes", () -> mainWindow.showOrderCardsPanel()));
         actionsPanel.add(Box.createVerticalStrut(15));
 
         actionsPanel.add(createActionButton("Voir les réservations", () -> mainWindow.showBookingListPanel()));

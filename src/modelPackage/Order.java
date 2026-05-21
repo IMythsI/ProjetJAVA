@@ -87,4 +87,8 @@ public class Order {
     public LocalTime getPickUpTime() {
         return pickupTime;
     }
+
+    public Status getStatus() {
+        return new Status("Pending");
+    }
 }
