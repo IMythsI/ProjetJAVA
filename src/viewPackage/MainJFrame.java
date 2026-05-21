@@ -1,9 +1,8 @@
 package viewPackage;
 
-import modelPackage.Table;
+import modelPackage.*;
 import viewPackage.Dashboard.WaiterDashboardPanel;
-import viewPackage.Order.OrderFormPanel;
-import viewPackage.Order.OrderListPanel;
+import viewPackage.Order.*;
 import viewPackage.Table.TableDetailPanel;
 
 import javax.swing.*;
@@ -119,5 +118,13 @@ public class MainJFrame extends JFrame {
 
     public void showAllergiesPanel() {
         //changePanel(new RestaurantTableListPanel(this));
+    }
+
+    public void showTakeAwayOrderFormPanel() {
+        changePanel(new TakeAwayOrderFormPanel(this));
+    }
+
+    public void showProductSelectionPanel(Order order) {
+        changePanel(new ProductSelectionPanel(this, order));
     }
 }

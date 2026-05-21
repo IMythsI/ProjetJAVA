@@ -96,38 +96,38 @@ public class WaiterDashboardPanel extends AbstractPanel {
     }
 
     private JButton createTableButton(Table table) {
-
         JButton button = new JButton();
-
         String statusLabel = table.getStatus().getStatusLabel();
-
-        button.setText("<html><center>"
-                + "Table " + table.getIdTable()
-                + "<br>"
-                + table.getNbSeats() + " places"
-                + "</center></html>");
+        button.setText(
+                "<html><center>"
+                        + "Table " + table.getIdTable()
+                        + "<br>"
+                        + table.getNbSeats() + " places"
+                        + "</center></html>"
+        );
 
         button.setPreferredSize(new Dimension(90, 70));
-        button.putClientProperty("JButton.buttonType", "roundRect");
+
+
+
+
+
         button.setFont(new Font("Arial", Font.BOLD, 13));
         button.setBackground(getColorByStatus(statusLabel));
-        button.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 40),1,true));
-        button.setBorderPainted(false);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         button.setToolTipText(
-                "Table " + table.getIdTable()
+                "Table "
+                        + table.getIdTable()
                         + " - "
                         + table.getNbSeats()
                         + " places"
                         + " - "
                         + statusLabel
         );
-
-        button.addActionListener(event ->
-                mainWindow.showTableDetailPanel(table)
-        );
-
+        button.addActionListener(event -> mainWindow.showTableDetailPanel(table));
         return button;
     }
 
@@ -158,7 +158,7 @@ public class WaiterDashboardPanel extends AbstractPanel {
         actionsPanel.add(createActionButton("Voir les allergies", () -> mainWindow.showAllergiesPanel()));
         actionsPanel.add(Box.createVerticalStrut(15));
 
-        actionsPanel.add(createActionButton("Créer une commande à emporter", () -> mainWindow.showOrderFormPanel()));
+        actionsPanel.add(createActionButton("Créer une commande à emporter", () -> mainWindow.showTakeAwayOrderFormPanel()));
 
         infoPanel.add(title, BorderLayout.NORTH);
         infoPanel.add(actionsPanel, BorderLayout.CENTER);

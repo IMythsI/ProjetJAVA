@@ -12,4 +12,12 @@ public class Employee {
         this.firstName = firstName;
         this.jobType = jobType;
     }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
 }

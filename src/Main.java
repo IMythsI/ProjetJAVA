@@ -1,18 +1,24 @@
+import com.formdev.flatlaf.*;
 import viewPackage.MainJFrame;
 
 import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-            } catch (Exception exception) {
-                System.out.println("Look and feel non chargé");
-            }
+        try {
 
-            MainJFrame window = new MainJFrame();
-            window.setVisible(true);
+            UIManager.setLookAndFeel(new FlatLightLaf());
+
+            UIManager.put("Button.arc", 15);
+            UIManager.put("Component.arc", 15);
+            UIManager.put("TextComponent.arc", 15);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        SwingUtilities.invokeLater(() -> {
+            MainJFrame frame = new MainJFrame();
+            frame.setVisible(true);
         });
     }
 }

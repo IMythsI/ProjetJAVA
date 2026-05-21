@@ -6,4 +6,8 @@ public class Type {
     public Type(String typeLabel) {
         this.typeLabel = typeLabel;
     }
+
+    public String getTypeLabel() {
+        return typeLabel;
+    }
 }

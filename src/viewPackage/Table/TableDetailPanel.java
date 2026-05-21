@@ -5,7 +5,7 @@ import exceptionPackage.*;
 import modelPackage.*;
 import viewPackage.AbstractPanel;
 import viewPackage.MainJFrame;
-import viewPackage.Order.OrderTableModel;
+import viewPackage.Order.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +33,7 @@ public class TableDetailPanel extends AbstractPanel {
         add(createCenterPanel(), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
 
-        loadTableOrdersIfOccupied();
+        loadTableLineOrdersIfOccupied();
     }
 
     private JPanel createTopPanel() {
@@ -119,10 +119,10 @@ public class TableDetailPanel extends AbstractPanel {
         }
     }
 
-    private void loadTableOrdersIfOccupied() {
+    private void loadTableLineOrdersIfOccupied() {
         if (!table.getStatus().getStatusLabel().equals("Occupied")) {
             JLabel message = new JLabel(
-                    "Aucune commande active : la table n'est pas occupée.",
+                    "Aucune ligne de commande : la table n'est pas occupée.",
                     SwingConstants.CENTER
             );
 
@@ -131,22 +131,32 @@ public class TableDetailPanel extends AbstractPanel {
         }
 
         try {
-            ArrayList<Order> orders = controller.getOrdersByTable(table.getIdTable());
-            BigDecimal total = controller.getTotalAmountByTable(table.getIdTable());
+            ArrayList<LineOrder> lineOrders =
+                    controller.getLineOrdersByTable(table.getIdTable());
 
-            JTable ordersTable = new JTable(new OrderTableModel(orders));
+            JTable lineOrderTable = new JTable(new LineOrderTableModel(lineOrders));
 
-            totalLabel = new JLabel("Total : " + total + " €", SwingConstants.RIGHT);
+            lineOrderTable.setRowHeight(28);
+            lineOrderTable.setAutoCreateRowSorter(true);
+            lineOrderTable.getTableHeader().setReorderingAllowed(false);
+
+            BigDecimal total = calculateTotal(lineOrders);
+
+            JLabel totalLabel = new JLabel("Total : " + total + " €", SwingConstants.RIGHT);
             totalLabel.setFont(new Font("Arial", Font.BOLD, 20));
 
-            JPanel ordersPanel = new JPanel(new BorderLayout(10, 10));
-            ordersPanel.add(new JLabel("Commandes de la table", SwingConstants.CENTER), BorderLayout.NORTH);
-            ordersPanel.add(new JScrollPane(ordersTable), BorderLayout.CENTER);
-            ordersPanel.add(totalLabel, BorderLayout.SOUTH);
+            JPanel lineOrderPanel = new JPanel(new BorderLayout(10, 10));
 
-            centerPanel.add(ordersPanel, BorderLayout.CENTER);
+            JLabel title = new JLabel("Produits commandés", SwingConstants.CENTER);
+            title.setFont(new Font("Arial", Font.BOLD, 20));
 
-        } catch (OrderException exception) {
+            lineOrderPanel.add(title, BorderLayout.NORTH);
+            lineOrderPanel.add(new JScrollPane(lineOrderTable), BorderLayout.CENTER);
+            lineOrderPanel.add(totalLabel, BorderLayout.SOUTH);
+
+            centerPanel.add(lineOrderPanel, BorderLayout.CENTER);
+
+        } catch (LineOrderException exception) {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
@@ -154,5 +164,19 @@ public class TableDetailPanel extends AbstractPanel {
                     JOptionPane.ERROR_MESSAGE
             );
         }
+    }
+
+    private BigDecimal calculateTotal(ArrayList<LineOrder> lineOrders) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (LineOrder line : lineOrders) {
+            BigDecimal lineTotal = line.getProduct()
+                    .getPrice()
+                    .multiply(BigDecimal.valueOf(line.getQuantity()));
+
+            total = total.add(lineTotal);
+        }
+
+        return total;
     }
 }
