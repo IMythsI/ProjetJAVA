@@ -10,6 +10,7 @@ import viewPackage.MainJFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,10 +28,32 @@ public class ProductSelectionPanel extends AbstractPanel {
     private JPanel cartPanel;
     private JLabel totalLabel;
 
+    private Table table;
+
     public ProductSelectionPanel(MainJFrame mainWindow, Order order) {
         super(mainWindow);
 
         this.order = order;
+        controller = new ApplicationController();
+        cart = new LinkedHashMap<>();
+
+        setLayout(new BorderLayout(20, 20));
+        setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+
+        add(createTopPanel(), BorderLayout.NORTH);
+        add(createMainPanel(), BorderLayout.CENTER);
+        add(createBottomPanel(), BorderLayout.SOUTH);
+
+        loadProducts();
+        refreshCart();
+    }
+
+    public ProductSelectionPanel(MainJFrame mainWindow, Table table) {
+        super(mainWindow);
+
+        this.table = table;
+        this.order = createTableOrder(table);
+
         controller = new ApplicationController();
         cart = new LinkedHashMap<>();
 
@@ -112,6 +135,20 @@ public class ProductSelectionPanel extends AbstractPanel {
         bottomPanel.add(buttonPanel, BorderLayout.EAST);
 
         return bottomPanel;
+    }
+
+    private Order createTableOrder(Table table) {
+        return new Order(
+                null,
+                "Commande table " + table.getIdTable(),
+                table.getNbSeats(),
+                LocalDate.now(),
+                false,
+                null,
+                null,
+                null,
+                table
+        );
     }
 
     private void loadProducts() {
@@ -278,11 +315,25 @@ public class ProductSelectionPanel extends AbstractPanel {
             return;
         }
 
-        JOptionPane.showMessageDialog(
-                this,
-                "La sélection est prête. Prochaine étape : enregistrer Order + LineOrder en base.",
-                "Information",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        try {
+            controller.validateOrder(order, cart);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Commande validée avec succès.",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            mainWindow.goBack();
+
+        } catch (OrderException exception) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    exception.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 }

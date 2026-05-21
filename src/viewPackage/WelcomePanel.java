@@ -76,6 +76,10 @@ public class WelcomePanel extends JPanel {
         JButton allergiesButton = createSmallButton("Allergies");
         JButton bookingsButton = createSmallButton("Réservations");
 
+        tablesButton.setBackground(Color.RED);
+        allergiesButton.setBackground(Color.RED);
+        bookingsButton.setBackground(Color.RED);
+
         /*
         tablesButton.addActionListener(event -> mainWindow.showTablesPanel());
         allergiesButton.addActionListener(event -> mainWindow.showAllergiesPanel());

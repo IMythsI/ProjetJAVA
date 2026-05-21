@@ -99,14 +99,6 @@ public class MainJFrame extends JFrame {
         changePanel(new OrderListPanel(this));
     }
 
-    public void showOrderFormPanel() {
-        changePanel(new OrderFormPanel(this));
-    }
-
-    public void showOrderFormTablePanel(Table table) {
-        changePanel(new OrderFormPanel(this, table));
-    }
-
     //Table
     public void showTableDetailPanel(Table table) {
         changePanel(new TableDetailPanel(this, table));
@@ -126,5 +118,9 @@ public class MainJFrame extends JFrame {
 
     public void showProductSelectionPanel(Order order) {
         changePanel(new ProductSelectionPanel(this, order));
+    }
+
+    public void showProductSelectionPanel(Table table) {
+        changePanel(new ProductSelectionPanel(this, table));
     }
 }

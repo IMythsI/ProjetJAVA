@@ -79,4 +79,12 @@ public class Order {
     public Table getTable() {
         return table;
     }
+
+    public boolean getIsTakeAway() {
+        return  isTakeAway;
+    }
+
+    public LocalTime getPickUpTime() {
+        return pickupTime;
+    }
 }

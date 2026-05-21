@@ -54,7 +54,6 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
 
         nameCustomerField = new JTextField(22);
         telCustomerField = new JTextField(22);
-        guestCountSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
 
         LocalTime now = LocalTime.now();
         int currentMinutes = now.getHour() * 60 + now.getMinute();
@@ -117,9 +116,8 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
 
         addFormRow(formPanel, gbc, 0, "Nom client *", nameCustomerField);
         addFormRow(formPanel, gbc, 1, "Téléphone", telCustomerField);
-        addFormRow(formPanel, gbc, 2, "Nombre de personnes *", guestCountSpinner);
-        addFormRow(formPanel, gbc, 3, "Heure de retrait *", timePanel);
-        addFormRow(formPanel, gbc, 4, "Commentaire", commentField);
+        addFormRow(formPanel, gbc, 2, "Heure de retrait *", timePanel);
+        addFormRow(formPanel, gbc, 3, "Commentaire", commentField);
 
         wrapperPanel.add(formPanel);
         return wrapperPanel;
@@ -194,9 +192,6 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
 
     private Order createTakeAwayOrderFromForm() {
 
-        Integer guestCount =
-                (Integer) guestCountSpinner.getValue();
-
         String nameCustomer =
                 getRequiredText(
                         nameCustomerField.getText(),
@@ -229,7 +224,7 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
         return new Order(
                 null,
                 comment,
-                guestCount,
+                1,
                 LocalDate.now(),
                 true,
                 pickUpTime,

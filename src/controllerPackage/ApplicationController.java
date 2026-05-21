@@ -6,18 +6,21 @@ import modelPackage.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ApplicationController {
     private OrderManager orderManager;
     private TableManager tableManager;
     private LineOrderManager lineOrderManager;
     private ProductManager productManager;
+    private OrderValidationManager orderValidationManager;
 
     public ApplicationController() {
         orderManager  = new OrderManager();
         tableManager = new TableManager();
         lineOrderManager = new LineOrderManager();
         productManager = new ProductManager();
+        orderValidationManager = new OrderValidationManager();
     }
 
     public ArrayList<Order> getAllOrders() throws OrderException {
@@ -50,5 +53,9 @@ public class ApplicationController {
 
     public ArrayList<Product> getAllProducts() throws ProductException {
         return productManager.getAllProducts();
+    }
+
+    public void validateOrder(Order order, Map<Product, Integer> cart) throws OrderException {
+        orderValidationManager.validateOrder(order, cart);
     }
 }

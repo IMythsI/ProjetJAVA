@@ -108,10 +108,6 @@ public class WaiterDashboardPanel extends AbstractPanel {
 
         button.setPreferredSize(new Dimension(90, 70));
 
-
-
-
-
         button.setFont(new Font("Arial", Font.BOLD, 13));
         button.setBackground(getColorByStatus(statusLabel));
         button.setForeground(Color.WHITE);

@@ -84,9 +84,7 @@ public class TableDetailPanel extends AbstractPanel {
         JButton createOrderButton = new JButton("Créer commande");
 
         saveStatusButton.addActionListener(event -> updateStatus());
-        createOrderButton.addActionListener(event ->
-                mainWindow.showOrderFormTablePanel(table)
-        );
+        createOrderButton.addActionListener(event -> mainWindow.showProductSelectionPanel(table));
 
         buttonPanel.add(createOrderButton);
         buttonPanel.add(saveStatusButton);
