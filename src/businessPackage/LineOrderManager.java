@@ -17,4 +17,8 @@ public class LineOrderManager {
     public ArrayList<LineOrder> getLineOrdersByTable(Integer idTable) throws LineOrderException {
         return lineOrderDAO.getLineOrdersByTable(idTable);
     }
+
+    public ArrayList<LineOrder> getLineOrdersByOrder(Integer idOrder) throws LineOrderException {
+        return lineOrderDAO.getLineOrdersByOrder(idOrder);
+    }
 }

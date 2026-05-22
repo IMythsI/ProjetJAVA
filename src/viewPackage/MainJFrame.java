@@ -19,7 +19,7 @@ public class MainJFrame extends JFrame {
 
         navigationStack = new Stack<>();
 
-        setBounds(100, 100, 1100, 650);
+        setBounds(100, 100, 1100, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -85,8 +85,11 @@ public class MainJFrame extends JFrame {
         }
     }
 
-    private void showWelcomePanel() {
-        changePanel(new WelcomePanel(this));
+    public void showWelcomePanel() {
+        navigationStack.clear();
+        setContentPane(new WelcomePanel(this));
+        revalidate();
+        repaint();
     }
 
     //Dashboard
