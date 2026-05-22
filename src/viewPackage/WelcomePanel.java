@@ -1,115 +1,136 @@
 package viewPackage;
 
+import viewPackage.stylePackage.AppTheme;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class WelcomePanel extends JPanel {
     private MainJFrame mainWindow;
-    private JComboBox<String> roleComboBox;
+    private CardFactory cardFactory = new CardFactory();
 
     public WelcomePanel(MainJFrame mainWindow) {
         this.mainWindow = mainWindow;
 
-        setLayout(new BorderLayout(20, 20));
-        setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
+        setLayout(new BorderLayout());
+        setBackground(AppTheme.BACKGROUND);
 
-        add(createTitlePanel(), BorderLayout.NORTH);
-        add(createRolePanel(), BorderLayout.CENTER);
-        add(createSecondaryButtonPanel(), BorderLayout.SOUTH);
+        add(createHeader(), BorderLayout.NORTH);
+        add(createMainContent(), BorderLayout.CENTER);
     }
 
-    private JPanel createTitlePanel() {
-        JPanel titlePanel = new JPanel(new GridLayout(2, 1, 5, 5));
+    private JPanel createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
 
-        JLabel titleLabel = new JLabel("Restaurant Management", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 38));
+        header.setPreferredSize(new Dimension(0, 70));
+        header.setBackground(AppTheme.NAVBAR);
+        header.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
 
-        JLabel subtitleLabel = new JLabel("Choisissez votre rôle", SwingConstants.CENTER);
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        JLabel title = new JLabel("Restaurant Manager");
+        title.setForeground(Color.WHITE);
+        title.setFont(AppTheme.NAVBAR_FONT);
 
-        titlePanel.add(titleLabel);
-        titlePanel.add(subtitleLabel);
+        header.add(title, BorderLayout.WEST);
 
-        return titlePanel;
+        return header;
     }
 
-    private JPanel createRolePanel() {
-        JPanel rolePanel = new JPanel(new GridBagLayout());
+    private JPanel createMainContent() {
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setOpaque(false);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 20, 25, 20));
+
         GridBagConstraints gbc = new GridBagConstraints();
-
-        JLabel roleLabel = new JLabel("Rôle :");
-        roleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-
-        roleComboBox = new JComboBox<>(new String[]{
-                "Serveur",
-                "Cuisine",
-                "Manager"
-        });
-        roleComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
-        roleComboBox.setPreferredSize(new Dimension(260, 38));
-
-        JButton continueButton = new JButton("Continuer");
-        continueButton.setFont(new Font("Arial", Font.BOLD, 16));
-        continueButton.setPreferredSize(new Dimension(160, 38));
-        continueButton.setFocusPainted(false);
-        continueButton.addActionListener(event -> openSelectedRole());
-
-        gbc.insets = new Insets(10, 10, 10, 10);
-
         gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        JLabel title = new JLabel("Choisis ton rôle");
+        title.setFont(AppTheme.TITLE_FONT);
+        title.setForeground(AppTheme.TEXT_PRIMARY);
+
+        JLabel subtitle = new JLabel("Sélectionner votre profil");
+        subtitle.setFont(AppTheme.SUBTITLE_FONT);
+        subtitle.setForeground(AppTheme.TEXT_SECONDARY);
+
         gbc.gridy = 0;
-        rolePanel.add(roleLabel, gbc);
+        gbc.insets = new Insets(0, 0, 14, 0);
+        mainPanel.add(title, gbc);
 
-        gbc.gridx = 1;
-        rolePanel.add(roleComboBox, gbc);
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 45, 0);
+        mainPanel.add(subtitle, gbc);
 
-        gbc.gridx = 2;
-        rolePanel.add(continueButton, gbc);
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 45, 0);
+        mainPanel.add(createRoleCardsPanel(), gbc);
 
-        return rolePanel;
+        gbc.gridy = 3;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        mainPanel.add(createSecondaryButtonsPanel(), gbc);
+
+        return mainPanel;
     }
 
-    private JPanel createSecondaryButtonPanel() {
-        JPanel secondaryPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+    private JPanel createRoleCardsPanel() {
+        JPanel wrapper = new JPanel(new GridLayout(2, 2, 35, 35));
 
-        JButton tablesButton = createSmallButton("Cartes / tables");
-        JButton allergiesButton = createSmallButton("Allergies");
-        JButton bookingsButton = createSmallButton("Réservations");
+        wrapper.setOpaque(false);
+        wrapper.setPreferredSize(new Dimension(520, 300));
+        wrapper.setMaximumSize(new Dimension(520, 300));
 
-        tablesButton.setBackground(Color.RED);
-        allergiesButton.setBackground(Color.RED);
-        bookingsButton.setBackground(Color.RED);
+        wrapper.add(cardFactory.createRoleCard(
+                "🍸",
+                "Barman",
+                "Gestion des boissons et commandes",
+                () -> JOptionPane.showMessageDialog(this, "Page barman à créer.")
+        ));
 
-        /*
-        tablesButton.addActionListener(event -> mainWindow.showTablesPanel());
-        allergiesButton.addActionListener(event -> mainWindow.showAllergiesPanel());
-        bookingsButton.addActionListener(event -> mainWindow.showBookingsPanel());
+        wrapper.add(cardFactory.createRoleCard(
+                "🍽",
+                "Serveur",
+                "Commandes, réservations et tables",
+                () -> mainWindow.showWaiterPanel()
+        ));
 
+        wrapper.add(cardFactory.createRoleCard(
+                "📊",
+                "Gérant",
+                "Statistiques et gestion du restaurant",
+                () -> JOptionPane.showMessageDialog(this, "Page gérant à créer.")
+        ));
 
-         */
-        secondaryPanel.add(tablesButton);
-        secondaryPanel.add(allergiesButton);
-        secondaryPanel.add(bookingsButton);
+        wrapper.add(cardFactory.createRoleCard(
+                "👨‍🍳",
+                "Cuisinier",
+                "Préparation et suivi des commandes",
+                () -> JOptionPane.showMessageDialog(this, "Page cuisinier à créer.")
+        ));
 
-        return secondaryPanel;
+        return wrapper;
     }
 
-    private JButton createSmallButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.PLAIN, 13));
-        button.setPreferredSize(new Dimension(150, 30));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return button;
-    }
+    private JPanel createSecondaryButtonsPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
 
-    private void openSelectedRole() {
-        String selectedRole = (String) roleComboBox.getSelectedItem();
-        switch (selectedRole) {
-            case "Serveur" -> mainWindow.showWaiterPanel();
-            //case "Cuisine" -> mainWindow.showCookPanel();
-            //case "Manager" -> mainWindow.showManagerPanel();
-        }
+        panel.setOpaque(false);
+        panel.setPreferredSize(new Dimension(700, 55));
+        panel.setMaximumSize(new Dimension(700, 55));
 
+        panel.add(cardFactory.createSecondaryButton(
+                "Réservations",
+                () -> mainWindow.showBookingListPanel()
+        ));
+
+        panel.add(cardFactory.createSecondaryButton(
+                "Allergies",
+                () -> mainWindow.showAllergiesPanel()
+        ));
+
+        panel.add(cardFactory.createSecondaryButton(
+                "Carte/Menu",
+                () -> JOptionPane.showMessageDialog(this, "Carte/Menu à créer.")
+        ));
+
+        return panel;
     }
 }

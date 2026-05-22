@@ -58,4 +58,8 @@ public class ApplicationController {
     public void validateOrder(Order order, Map<Product, Integer> cart) throws OrderException {
         orderValidationManager.validateOrder(order, cart);
     }
+
+    public ArrayList<LineOrder> getLineOrdersByOrder(Integer idOrder) throws LineOrderException {
+        return lineOrderManager.getLineOrdersByOrder(idOrder);
+    }
 }

@@ -7,4 +7,6 @@ import java.util.ArrayList;
 
 public interface LineOrderDataAccess {
     ArrayList<LineOrder> getLineOrdersByTable(Integer idTable) throws LineOrderException;
+
+    ArrayList<LineOrder> getLineOrdersByOrder(Integer idOrder) throws LineOrderException;
 }

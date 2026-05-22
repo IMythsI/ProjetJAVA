@@ -10,6 +10,8 @@ import lib.WrapLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OrderCardsPanel extends AbstractPanel {
     private ApplicationController controller;
@@ -17,15 +19,18 @@ public class OrderCardsPanel extends AbstractPanel {
     private JCheckBox tableOrdersCheckBox;
     private JCheckBox takeAwayOrdersCheckBox;
     private JCheckBox finishedOrdersCheckBox;
+    private JButton refreshButton;
 
     private JPanel cardsPanel;
     private ArrayList<Order> orders;
+    private Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder;
 
     public OrderCardsPanel(MainJFrame mainWindow) {
         super(mainWindow);
 
         controller = new ApplicationController();
         orders = new ArrayList<>();
+        lineOrdersByOrder = new HashMap<>();
 
         setLayout(new BorderLayout(20, 20));
         setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
@@ -59,6 +64,7 @@ public class OrderCardsPanel extends AbstractPanel {
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(10);
         scrollPane.setBorder(null);
 
         centerPanel.add(scrollPane, BorderLayout.CENTER);
@@ -73,31 +79,76 @@ public class OrderCardsPanel extends AbstractPanel {
         takeAwayOrdersCheckBox = new JCheckBox("Commandes à emporter", true);
         finishedOrdersCheckBox = new JCheckBox("Commandes terminées", false);
 
+        refreshButton = new JButton("Refresh");
+
         tableOrdersCheckBox.addActionListener(event -> refreshCards());
         takeAwayOrdersCheckBox.addActionListener(event -> refreshCards());
         finishedOrdersCheckBox.addActionListener(event -> refreshCards());
+
+        refreshButton.addActionListener(event -> {loadOrders();refreshCards();});
 
         filterPanel.add(new JLabel("Afficher :"));
         filterPanel.add(tableOrdersCheckBox);
         filterPanel.add(takeAwayOrdersCheckBox);
         filterPanel.add(finishedOrdersCheckBox);
+        filterPanel.add(refreshButton);
 
         return filterPanel;
     }
 
     private void loadOrders() {
-        try {
-            orders = controller.getAllOrders();
-            refreshCards();
+        showLoading();
 
-        } catch (OrderException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+        SwingWorker<OrderCardsData, Void> worker = new SwingWorker<>() {
+            @Override
+            protected OrderCardsData doInBackground() throws Exception {
+                ArrayList<Order> loadedOrders = controller.getAllOrders();
+                Map<Integer, ArrayList<LineOrder>> loadedLines = new HashMap<>();
+
+                for (Order order : loadedOrders) {
+                    loadedLines.put(
+                            order.getIdOrder(),
+                            controller.getLineOrdersByOrder(order.getIdOrder())
+                    );
+                }
+
+                return new OrderCardsData(loadedOrders, loadedLines);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    OrderCardsData data = get();
+
+                    orders = data.orders;
+                    lineOrdersByOrder = data.lineOrdersByOrder;
+
+                    refreshCards();
+
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            OrderCardsPanel.this,
+                            "Erreur lors du chargement des commandes.",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        };
+
+        worker.execute();
+    }
+
+    private void showLoading() {
+        cardsPanel.removeAll();
+
+        JLabel loadingLabel = new JLabel("Chargement des commandes...", SwingConstants.CENTER);
+        loadingLabel.setFont(new Font("Arial", Font.BOLD, 18));
+
+        cardsPanel.add(loadingLabel);
+
+        cardsPanel.revalidate();
+        cardsPanel.repaint();
     }
 
     private void refreshCards() {
@@ -126,11 +177,14 @@ public class OrderCardsPanel extends AbstractPanel {
         }
 
         filteredOrders.sort((o1, o2) -> {
-            if (isFinished(o1) && !isFinished(o2)) {
+            boolean firstFinished = isFinished(o1);
+            boolean secondFinished = isFinished(o2);
+
+            if (firstFinished && !secondFinished) {
                 return 1;
             }
 
-            if (!isFinished(o1) && isFinished(o2)) {
+            if (!firstFinished && secondFinished) {
                 return -1;
             }
 
@@ -138,7 +192,13 @@ public class OrderCardsPanel extends AbstractPanel {
         });
 
         for (Order order : filteredOrders) {
-            cardsPanel.add(new OrderCardPanel(order));
+            ArrayList<LineOrder> lines = lineOrdersByOrder.get(order.getIdOrder());
+
+            if (lines == null) {
+                lines = new ArrayList<>();
+            }
+
+            cardsPanel.add(new OrderCardPanel(order, lines));
         }
 
         cardsPanel.revalidate();
@@ -146,7 +206,29 @@ public class OrderCardsPanel extends AbstractPanel {
     }
 
     private boolean isFinished(Order order) {
-        return order.getStatus() != null
-                && order.getStatus().getStatusLabel().equals("Served");
+        ArrayList<LineOrder> lines = lineOrdersByOrder.get(order.getIdOrder());
+
+        if (lines == null || lines.isEmpty()) {
+            return false;
+        }
+
+        for (LineOrder line : lines) {
+            if (!line.getStatus().getStatusLabel().equals("Served")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static class OrderCardsData {
+        private ArrayList<Order> orders;
+        private Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder;
+
+        public OrderCardsData(ArrayList<Order> orders,
+                              Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder) {
+            this.orders = orders;
+            this.lineOrdersByOrder = lineOrdersByOrder;
+        }
     }
 }
