@@ -57,12 +57,10 @@ public class OrderCardPanel extends JPanel {
         JPanel contentPanel = new JPanel(new GridLayout(2, 1, 5, 5));
         contentPanel.setOpaque(false);
 
-        contentPanel.add(new JLabel("Personnes : " + order.getGuestCount()));
-
-        if (order.getIsTakeAway()) {
-            contentPanel.add(new JLabel("Client : " + order.getNameCustomer()));
-        } else {
-            contentPanel.add(new JLabel("Table : " + order.getTable().getIdTable()));
+        if (!order.getIsTakeAway()) {
+            contentPanel.add(new JLabel("Personnes : " + order.getGuestCount()));
+        }else{
+            contentPanel.add(new JLabel("Heure de retrait : " + order.getPickUpTime()));
         }
 
         return contentPanel;
@@ -97,7 +95,7 @@ public class OrderCardPanel extends JPanel {
 
     private String getOrderTitle() {
         if (order.getIsTakeAway()) {
-            return "Commande client";
+            return "Client : " + order.getNameCustomer();
         }
 
         return "Table " + order.getTable().getIdTable();
