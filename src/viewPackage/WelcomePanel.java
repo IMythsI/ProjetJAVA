@@ -38,7 +38,7 @@ public class WelcomePanel extends JPanel {
     private JPanel createMainContent() {
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setOpaque(false);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 20, 25, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 20, 25, 20));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
