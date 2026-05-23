@@ -3,7 +3,7 @@ package viewPackage;
 import modelPackage.*;
 import viewPackage.Dashboard.WaiterDashboardPanel;
 import viewPackage.Order.*;
-import viewPackage.Table.TableDetailPanel;
+import viewPackage.Table.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -105,6 +105,10 @@ public class MainJFrame extends JFrame {
     //Table
     public void showTableDetailPanel(Table table) {
         changePanel(new TableDetailPanel(this, table));
+    }
+
+    public void showTableListPanel() {
+        changePanel(new TableListPanel(this));
     }
 
     public void showBookingListPanel() {
