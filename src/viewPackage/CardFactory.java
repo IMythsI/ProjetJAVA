@@ -13,37 +13,55 @@ public class CardFactory {
         card.setLayout(new BorderLayout(8, 8));
         card.setBackground(AppTheme.CARD);
         card.setFocusPainted(false);
-        card.setBorder(BorderFactory.createEmptyBorder(12, 18, 16, 18));
-        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
-        iconLabel.setForeground(AppTheme.PRIMARY);
-
-        JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        iconPanel.setOpaque(false);
-
-        // Padding haut pour éviter que l'icône soit coupée
-        iconPanel.setBorder(
+        card.setBorder(
                 BorderFactory.createEmptyBorder(
-                        6,
-                        0,
-                        0,
-                        0
+                        18,
+                        18,
+                        16,
+                        18
                 )
         );
 
+        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JLabel iconLabel = new JLabel(icon);
+
+        iconLabel.setFont(new Font("Segoe UI Emoji",Font.PLAIN,22));
+
+        iconLabel.setForeground(AppTheme.PRIMARY);
+
+        JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
+
+        iconPanel.setOpaque(false);
+
         iconPanel.add(iconLabel);
 
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel(
+                title,
+                SwingConstants.CENTER
+        );
+
         titleLabel.setFont(AppTheme.CARD_TITLE_FONT);
         titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
 
-        JLabel descriptionLabel = new JLabel(description, SwingConstants.CENTER);
+        JLabel descriptionLabel = new JLabel(
+                description,
+                SwingConstants.CENTER
+        );
+
         descriptionLabel.setFont(AppTheme.CARD_DESCRIPTION_FONT);
         descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
 
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 8));
+        JPanel centerPanel = new JPanel(
+                new GridLayout(
+                        2,
+                        1,
+                        0,
+                        8
+                )
+        );
+
         centerPanel.setOpaque(false);
 
         centerPanel.add(titleLabel);
@@ -140,7 +158,7 @@ public class CardFactory {
 
             g2.setColor(new Color(70, 120, 240, 60));
 
-            g2.setStroke(new BasicStroke(1.2f));
+            g2.setStroke(new BasicStroke(1));
 
             g2.drawRoundRect(
                     0,
