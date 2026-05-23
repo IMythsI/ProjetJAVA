@@ -158,7 +158,7 @@ public class CardFactory {
 
             g2.setColor(new Color(70, 120, 240, 60));
 
-            g2.setStroke(new BasicStroke(1.2f));
+            g2.setStroke(new BasicStroke(1));
 
             g2.drawRoundRect(
                     0,
