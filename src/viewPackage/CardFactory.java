@@ -1,6 +1,6 @@
 package viewPackage;
 
-import viewPackage.stylePackage.AppTheme;
+import viewPackage.ui.AppTheme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -99,7 +99,7 @@ public class CardFactory {
         return button;
     }
 
-    private static class RoundedButton extends JButton {
+    public static class RoundedButton extends JButton {
         private final int arc;
 
         private boolean hovered;
@@ -161,13 +161,14 @@ public class CardFactory {
             g2.setStroke(new BasicStroke(1));
 
             g2.drawRoundRect(
-                    0,
-                    0,
-                    getWidth() - 1,
-                    getHeight() - 1,
+                    1,
+                    1,
+                    getWidth() - 2,
+                    getHeight() - 2,
                     arc,
                     arc
             );
+
 
             g2.dispose();
 

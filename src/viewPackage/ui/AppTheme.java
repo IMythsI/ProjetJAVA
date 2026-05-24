@@ -1,4 +1,4 @@
-package viewPackage.stylePackage;
+package viewPackage.ui;
 
 import java.awt.*;
 

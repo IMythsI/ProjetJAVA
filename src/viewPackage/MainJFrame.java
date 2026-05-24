@@ -1,7 +1,8 @@
 package viewPackage;
 
 import modelPackage.*;
-import viewPackage.Dashboard.WaiterDashboardPanel;
+import viewPackage.Booking.*;
+import viewPackage.Dashboard.*;
 import viewPackage.Order.*;
 import viewPackage.Table.*;
 
@@ -112,7 +113,7 @@ public class MainJFrame extends JFrame {
     }
 
     public void showBookingListPanel() {
-        //changePanel(new BookingListPanel(this));
+        changePanel(new BookingListPanel(this));
     }
 
     public void showAllergiesPanel() {
