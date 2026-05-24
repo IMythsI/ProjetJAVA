@@ -1,9 +1,12 @@
 package viewPackage.Order;
 
 import modelPackage.Order;
-import viewPackage.AbstractPanel;
 import viewPackage.MainJFrame;
-import viewPackage.stylePackage.AppTheme;
+import viewPackage.ui.AppPage;
+import viewPackage.ui.ButtonFactory;
+import viewPackage.ui.CardFactory;
+import viewPackage.ui.FormFactory;
+import viewPackage.ui.AppTheme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Hashtable;
 
-public class TakeAwayOrderFormPanel extends AbstractPanel {
+public class TakeAwayOrderFormPanel extends AppPage {
     private JTextField nameCustomerField;
     private JTextField telCustomerField;
     private JTextField commentField;
@@ -19,84 +22,16 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
     private JLabel pickUpTimeValueLabel;
 
     public TakeAwayOrderFormPanel(MainJFrame mainWindow) {
-        super(mainWindow);
+        super(mainWindow, true);
 
-        setLayout(new BorderLayout());
-        setBackground(AppTheme.BACKGROUND);
-
-        add(createHeader(), BorderLayout.NORTH);
-        add(createMainContent(), BorderLayout.CENTER);
-    }
-
-    private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setPreferredSize(new Dimension(0, 70));
-        header.setBackground(AppTheme.NAVBAR);
-        header.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 30));
-
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 17));
-        leftPanel.setOpaque(false);
-
-        JButton backButton = createBackButton();
-
-        JLabel title = new JLabel("Restaurant Manager");
-        title.setForeground(Color.WHITE);
-        title.setFont(AppTheme.NAVBAR_FONT);
-
-        leftPanel.add(backButton);
-        leftPanel.add(title);
-
-        header.add(leftPanel, BorderLayout.WEST);
-
-        return header;
-    }
-
-    private JPanel createMainContent() {
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setOpaque(false);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        JLabel title = new JLabel("Nouvelle commande à emporter");
-        title.setFont(AppTheme.TITLE_FONT);
-        title.setForeground(AppTheme.TEXT_PRIMARY);
-
-        JLabel subtitle = new JLabel("Renseigner les informations du client");
-        subtitle.setFont(AppTheme.SUBTITLE_FONT);
-        subtitle.setForeground(AppTheme.TEXT_SECONDARY);
-
-        JPanel card = createFormCard();
-
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 6, 0);
-        mainPanel.add(title, gbc);
-
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 25, 0);
-        mainPanel.add(subtitle, gbc);
-
-        gbc.gridy = 2;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        mainPanel.add(card, gbc);
-
-        return mainPanel;
+        addCentered(createPageTitle("Nouvelle commande à emporter"), 0, new Insets(0, 0, 6, 0));
+        addCentered(createPageSubtitle("Renseigner les informations du client"), 1, new Insets(0, 0, 25, 0));
+        addCentered(createFormCard(), 2, new Insets(0, 0, 0, 0));
     }
 
     private JPanel createFormCard() {
-        JPanel card = new JPanel(new BorderLayout(20, 25));
-
-        card.setBackground(AppTheme.CARD);
-        card.setPreferredSize(new Dimension(500, 350));
-        card.setMinimumSize(new Dimension(500, 350));
+        JPanel card = CardFactory.createCard(500, 350);
         card.setBorder(BorderFactory.createEmptyBorder(15, 35, 15, 35));
-
-        card.putClientProperty("FlatLaf.style", "arc:20");
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
@@ -105,9 +40,9 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
         gbc.insets = new Insets(14, 8, 14, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        nameCustomerField = createTextField();
-        telCustomerField = createTextField();
-        commentField = createTextField();
+        nameCustomerField = FormFactory.createTextField();
+        telCustomerField = FormFactory.createTextField();
+        commentField = FormFactory.createTextField();
 
         JPanel timePanel = createTimeSliderPanel();
 
@@ -122,16 +57,6 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
         return card;
     }
 
-    private JTextField createTextField() {
-        JTextField field = new JTextField();
-
-        field.setPreferredSize(null);
-        field.setMinimumSize(new Dimension(300, 30));
-        field.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        return field;
-    }
-
     private JPanel createTimeSliderPanel() {
         LocalTime now = LocalTime.now();
 
@@ -139,7 +64,6 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
         currentMinutes = Math.round(currentMinutes / 15f) * 15;
 
         pickUpTimeSlider = new JSlider(0, 24 * 60, currentMinutes);
-
         pickUpTimeSlider.setPreferredSize(new Dimension(460, 100));
 
         pickUpTimeSlider.setMajorTickSpacing(6 * 60);
@@ -178,7 +102,7 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
     private void addFormRow(JPanel panel, GridBagConstraints gbc, int row,
                             String labelText, JComponent field, int height) {
         JLabel label = new JLabel(labelText);
-        label.setFont(new Font("Arial", Font.BOLD, 14));
+        label.setFont(AppTheme.BUTTON_FONT);
         label.setForeground(AppTheme.TEXT_PRIMARY);
 
         gbc.gridx = 0;
@@ -201,39 +125,10 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         buttonPanel.setOpaque(false);
 
-        JButton cancelButton = new JButton("Annuler");
-        JButton nextButton = new JButton("Choisir les produits");
-
-        styleSecondaryButton(cancelButton);
-        stylePrimaryButton(nextButton);
-
-        cancelButton.addActionListener(event -> mainWindow.goBack());
-        nextButton.addActionListener(event -> goToProductSelection());
-
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(nextButton);
+        buttonPanel.add(ButtonFactory.createSecondaryButton("Annuler", () -> mainWindow.goBack()));
+        buttonPanel.add(ButtonFactory.createPrimaryButton("Choisir les produits", this::goToProductSelection));
 
         return buttonPanel;
-    }
-
-    private void stylePrimaryButton(JButton button) {
-        button.setPreferredSize(new Dimension(170, 40));
-        button.setFont(AppTheme.BUTTON_FONT);
-        button.setForeground(Color.WHITE);
-        button.setBackground(AppTheme.PRIMARY);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.putClientProperty("JButton.buttonType", "roundRect");
-    }
-
-    private void styleSecondaryButton(JButton button) {
-        button.setPreferredSize(new Dimension(110, 40));
-        button.setFont(AppTheme.BUTTON_FONT);
-        button.setForeground(AppTheme.TEXT_PRIMARY);
-        button.setBackground(AppTheme.CARD);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.putClientProperty("JButton.buttonType", "roundRect");
     }
 
     private String formatTimeFromSlider() {
@@ -265,11 +160,7 @@ public class TakeAwayOrderFormPanel extends AbstractPanel {
     }
 
     private Order createTakeAwayOrderFromForm() {
-        String nameCustomer = getRequiredText(
-                nameCustomerField.getText(),
-                "Nom client"
-        );
-
+        String nameCustomer = getRequiredText(nameCustomerField.getText(), "Nom client");
         String telCustomer = emptyToNull(telCustomerField.getText());
         String comment = emptyToNull(commentField.getText());
 

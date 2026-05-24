@@ -2,11 +2,11 @@ package viewPackage.Table;
 
 import controllerPackage.ApplicationController;
 import exceptionPackage.TableException;
-import lib.WrapLayout;
 import modelPackage.Table;
 import viewPackage.AbstractPanel;
+import viewPackage.CardFactory;
 import viewPackage.MainJFrame;
-import viewPackage.stylePackage.AppTheme;
+import viewPackage.ui.AppTheme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -140,6 +140,7 @@ public class TableListPanel extends AbstractPanel {
         tablesPanel.removeAll();
 
         int cardWidth = 130;
+        int cardHeight = 160;
         int gap = 25;
 
         int availableWidth = tablesPanel.getWidth();
@@ -149,8 +150,16 @@ public class TableListPanel extends AbstractPanel {
         }
 
         int columns = Math.max(1, availableWidth / (cardWidth + gap));
+        int rows = (int) Math.ceil((double) loadedTables.size() / columns);
 
-        tablesPanel.setLayout(new GridLayout(0, columns, gap, gap));
+        tablesPanel.setLayout(new GridLayout(rows, columns, gap, gap));
+
+        tablesPanel.setPreferredSize(
+                new Dimension(
+                        850,
+                        rows * cardHeight + Math.max(0, rows - 1) * gap
+                )
+        );
 
         for (Table table : loadedTables) {
             tablesPanel.add(createTableCard(table));
@@ -161,20 +170,30 @@ public class TableListPanel extends AbstractPanel {
     }
 
     private JButton createTableCard(Table table) {
-        JButton card = new JButton();
+        JButton card = new CardFactory.RoundedButton(25);
 
         String statusLabel = table.getStatus().getStatusLabel();
 
         card.setLayout(new BorderLayout(5, 8));
-        card.setPreferredSize(new Dimension(130, 100));
+
+        card.setPreferredSize(new Dimension(130, 160));
+        card.setMinimumSize(new Dimension(130, 160));
+        card.setMaximumSize(new Dimension(130, 160));
+
         card.setBackground(AppTheme.CARD);
+
+        card.setContentAreaFilled(false);
+        card.setOpaque(false);
+
         card.setFocusPainted(false);
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        card.setBorder(BorderFactory.createEmptyBorder(18, 15, 18, 15));
-        card.putClientProperty("JButton.buttonType", "roundRect");
+
+        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
 
         JLabel icon = new JLabel("\uD83E\uDE91", SwingConstants.CENTER);
-        icon.setFont(new Font("Segoe UI Emoji", Font.BOLD, 28));
+        icon.setPreferredSize(new Dimension(35, 35));
+        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 26));
         icon.setForeground(AppTheme.PRIMARY);
 
         JLabel tableLabel = new JLabel("Table " + table.getIdTable(), SwingConstants.CENTER);
@@ -214,9 +233,11 @@ public class TableListPanel extends AbstractPanel {
 
     private JPanel createLegendPanel() {
         JPanel legend = new JPanel(new FlowLayout(FlowLayout.CENTER, 35, 0));
+
         legend.setBackground(AppTheme.CARD);
-        legend.setPreferredSize(new Dimension(620, 45));
-        legend.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        legend.setPreferredSize(new Dimension(620, 50));
+        legend.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+        legend.putClientProperty("FlatLaf.style", "arc:18");
 
         legend.add(createLegendItem("Libre", new Color(70, 191, 70)));
         legend.add(createLegendItem("Occupée", new Color(230, 78, 78)));
@@ -227,14 +248,16 @@ public class TableListPanel extends AbstractPanel {
     }
 
     private JPanel createLegendItem(String text, Color color) {
-        JPanel item = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        JPanel item = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 13));
         item.setOpaque(false);
 
-        JLabel dot = new JLabel("\uD83D\uDD18");
+        JLabel dot = new JLabel("●");
         dot.setForeground(color);
+        dot.setFont(new Font("Arial", Font.BOLD, 14));
 
         JLabel label = new JLabel(text);
         label.setFont(AppTheme.BUTTON_FONT);
+        label.setForeground(AppTheme.TEXT_PRIMARY);
 
         item.add(dot);
         item.add(label);

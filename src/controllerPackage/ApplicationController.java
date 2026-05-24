@@ -5,6 +5,7 @@ import exceptionPackage.*;
 import modelPackage.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ public class ApplicationController {
     private LineOrderManager lineOrderManager;
     private ProductManager productManager;
     private OrderValidationManager orderValidationManager;
+    private BookingManager bookingManager;
 
     public ApplicationController() {
         orderManager  = new OrderManager();
@@ -21,6 +23,7 @@ public class ApplicationController {
         lineOrderManager = new LineOrderManager();
         productManager = new ProductManager();
         orderValidationManager = new OrderValidationManager();
+        bookingManager = new BookingManager();
     }
 
     public ArrayList<Order> getAllOrders() throws OrderException {
@@ -61,5 +64,9 @@ public class ApplicationController {
 
     public ArrayList<LineOrder> getLineOrdersByOrder(Integer idOrder) throws LineOrderException {
         return lineOrderManager.getLineOrdersByOrder(idOrder);
+    }
+
+    public ArrayList<Book> getBookingsByDate(LocalDate date) throws BookingException {
+        return bookingManager.getBookingsByDate(date);
     }
 }

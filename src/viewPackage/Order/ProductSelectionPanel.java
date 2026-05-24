@@ -4,9 +4,12 @@ import controllerPackage.ApplicationController;
 import exceptionPackage.*;
 import lib.WrapLayout;
 import modelPackage.*;
-import viewPackage.AbstractPanel;
 import viewPackage.MainJFrame;
-import viewPackage.stylePackage.AppTheme;
+import viewPackage.ui.AppTheme;
+import viewPackage.ui.AppPage;
+import viewPackage.ui.ButtonFactory;
+import viewPackage.ui.CardFactory;
+import viewPackage.ui.FormFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ProductSelectionPanel extends AbstractPanel {
+public class ProductSelectionPanel extends AppPage {
     private ApplicationController controller;
     private Order order;
     private Table table;
@@ -34,13 +37,13 @@ public class ProductSelectionPanel extends AbstractPanel {
     private JPanel cartCard;
 
     public ProductSelectionPanel(MainJFrame mainWindow, Order order) {
-        super(mainWindow);
+        super(mainWindow, true);
         this.order = order;
         init();
     }
 
     public ProductSelectionPanel(MainJFrame mainWindow, Table table) {
-        super(mainWindow);
+        super(mainWindow, true);
         this.table = table;
         this.order = createTableOrder(table);
         init();
@@ -50,81 +53,12 @@ public class ProductSelectionPanel extends AbstractPanel {
         controller = new ApplicationController();
         cart = new LinkedHashMap<>();
 
-        setLayout(new BorderLayout());
-        setBackground(AppTheme.BACKGROUND);
-
-        add(createHeader(), BorderLayout.NORTH);
-        add(createScrollableMainContent(), BorderLayout.CENTER);
+        addCentered(createPageTitle("Sélection des produits"), 0, new Insets(0, 0, 8, 0));
+        addCentered(createPageSubtitle(getSubtitle()), 1, new Insets(0, 0, 35, 0));
+        addCentered(createContentCards(), 2, new Insets(0, 0, 0, 0));
 
         loadProducts();
         refreshCart();
-    }
-
-    private JScrollPane createScrollableMainContent() {
-        JScrollPane scrollPane = new JScrollPane(createMainContent());
-
-        scrollPane.setBorder(null);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
-        scrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
-
-        return scrollPane;
-    }
-
-    private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setPreferredSize(new Dimension(0, 70));
-        header.setBackground(AppTheme.NAVBAR);
-        header.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 30));
-
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 17));
-        leftPanel.setOpaque(false);
-
-        JButton backButton = createBackButton();
-
-        JLabel title = new JLabel("Restaurant Manager");
-        title.setForeground(Color.WHITE);
-        title.setFont(AppTheme.NAVBAR_FONT);
-
-        leftPanel.add(backButton);
-        leftPanel.add(title);
-
-        header.add(leftPanel, BorderLayout.WEST);
-
-        return header;
-    }
-
-    private JPanel createMainContent() {
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setOpaque(false);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(35, 30, 35, 30));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        JLabel title = new JLabel("Sélection des produits");
-        title.setFont(AppTheme.TITLE_FONT);
-        title.setForeground(AppTheme.TEXT_PRIMARY);
-
-        JLabel subtitle = new JLabel(getSubtitle());
-        subtitle.setFont(AppTheme.SUBTITLE_FONT);
-        subtitle.setForeground(AppTheme.TEXT_SECONDARY);
-
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 8, 0);
-        mainPanel.add(title, gbc);
-
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 35, 0);
-        mainPanel.add(subtitle, gbc);
-
-        gbc.gridy = 2;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        mainPanel.add(createContentCards(), gbc);
-
-        return mainPanel;
     }
 
     private String getSubtitle() {
@@ -139,17 +73,16 @@ public class ProductSelectionPanel extends AbstractPanel {
         contentCardsPanel = new JPanel(new GridBagLayout());
         contentCardsPanel.setOpaque(false);
 
+        productsCard = createProductsCard();
+        cartCard = createCartCard();
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTH;
 
-        productsCard = createProductsCard();
-        cartCard = createCartCard();
-
         gbc.gridx = 0;
         gbc.weightx = 0.70;
-        gbc.weighty = 1;
         gbc.insets = new Insets(0, 0, 0, 25);
         contentCardsPanel.add(productsCard, gbc);
 
@@ -164,17 +97,14 @@ public class ProductSelectionPanel extends AbstractPanel {
     }
 
     private JPanel createProductsCard() {
-        JPanel card = new JPanel(new BorderLayout(15, 15));
-        card.setBackground(AppTheme.CARD);
+        JPanel card = CardFactory.createAdaptiveCard(600, 430);
         card.setBorder(BorderFactory.createEmptyBorder(22, 25, 22, 25));
-        card.setMinimumSize(new Dimension(600, 430));
-        card.putClientProperty("FlatLaf.style", "arc:20");
 
         JLabel title = new JLabel("Produits");
         title.setFont(new Font("Arial", Font.BOLD, 18));
         title.setForeground(AppTheme.TEXT_PRIMARY);
 
-        typeComboBox = new JComboBox<>();
+        typeComboBox = FormFactory.createComboBox();
         typeComboBox.setPreferredSize(new Dimension(180, 38));
         typeComboBox.addActionListener(event -> refreshProductsBySelectedType());
 
@@ -194,11 +124,8 @@ public class ProductSelectionPanel extends AbstractPanel {
     }
 
     private JPanel createCartCard() {
-        JPanel card = new JPanel(new BorderLayout(15, 15));
-        card.setBackground(AppTheme.CARD);
+        JPanel card = CardFactory.createAdaptiveCard(320, 430);
         card.setBorder(BorderFactory.createEmptyBorder(22, 20, 22, 20));
-        card.setMinimumSize(new Dimension(320, 430));
-        card.putClientProperty("FlatLaf.style", "arc:20");
 
         JLabel title = new JLabel("Panier");
         title.setFont(new Font("Arial", Font.BOLD, 18));
@@ -227,17 +154,15 @@ public class ProductSelectionPanel extends AbstractPanel {
         JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 0, 10));
         buttonPanel.setOpaque(false);
 
-        JButton validateButton = new JButton("Valider la commande");
-        JButton cancelButton = new JButton("Annuler");
+        buttonPanel.add(ButtonFactory.createPrimaryButton(
+                "Valider la commande",
+                this::validateOrder
+        ));
 
-        stylePrimaryButton(validateButton);
-        styleSecondaryButton(cancelButton);
-
-        validateButton.addActionListener(event -> validateOrder());
-        cancelButton.addActionListener(event -> mainWindow.goBack());
-
-        buttonPanel.add(validateButton);
-        buttonPanel.add(cancelButton);
+        buttonPanel.add(ButtonFactory.createSecondaryButton(
+                "Annuler",
+                () -> mainWindow.goBack()
+        ));
 
         bottomPanel.add(totalLabel, BorderLayout.NORTH);
         bottomPanel.add(buttonPanel, BorderLayout.CENTER);
@@ -287,26 +212,6 @@ public class ProductSelectionPanel extends AbstractPanel {
         lineButton.addActionListener(event -> removeOneProduct(product));
 
         return lineButton;
-    }
-
-    private void stylePrimaryButton(JButton button) {
-        button.setPreferredSize(new Dimension(240, 42));
-        button.setFont(AppTheme.BUTTON_FONT);
-        button.setForeground(Color.WHITE);
-        button.setBackground(AppTheme.PRIMARY);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.putClientProperty("JButton.buttonType", "roundRect");
-    }
-
-    private void styleSecondaryButton(JButton button) {
-        button.setPreferredSize(new Dimension(240, 42));
-        button.setFont(AppTheme.BUTTON_FONT);
-        button.setForeground(AppTheme.TEXT_PRIMARY);
-        button.setBackground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.putClientProperty("JButton.buttonType", "roundRect");
     }
 
     private void updateCardsSize() {
@@ -419,19 +324,11 @@ public class ProductSelectionPanel extends AbstractPanel {
         productButtonsPanel.revalidate();
         productButtonsPanel.repaint();
 
-        revalidate();
-        repaint();
+        refreshPage();
     }
 
     private void addProductToCart(Product product) {
-        Integer quantity = cart.get(product);
-
-        if (quantity == null) {
-            cart.put(product, 1);
-        } else {
-            cart.put(product, quantity + 1);
-        }
-
+        cart.put(product, cart.getOrDefault(product, 0) + 1);
         refreshCart();
     }
 
@@ -473,18 +370,16 @@ public class ProductSelectionPanel extends AbstractPanel {
         cartPanel.revalidate();
         cartPanel.repaint();
 
-        revalidate();
-        repaint();
+        refreshPage();
     }
 
     private BigDecimal calculateTotal() {
         BigDecimal total = BigDecimal.ZERO;
 
         for (Product product : cart.keySet()) {
-            BigDecimal lineTotal = product.getPrice()
-                    .multiply(BigDecimal.valueOf(cart.get(product)));
-
-            total = total.add(lineTotal);
+            total = total.add(
+                    product.getPrice().multiply(BigDecimal.valueOf(cart.get(product)))
+            );
         }
 
         return total;
