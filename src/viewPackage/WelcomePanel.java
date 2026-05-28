@@ -1,8 +1,6 @@
 package viewPackage;
 
-import viewPackage.ui.AppPage;
-import viewPackage.ui.ButtonFactory;
-import viewPackage.ui.CardFactory;
+import viewPackage.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,24 +13,30 @@ public class WelcomePanel extends AppPage {
         addCentered(
                 createPageTitle("Choisis ton rôle"),
                 0,
-                new Insets(0, 0, 14, 0)
+                new Insets(0, 0, 10, 0)
         );
 
         addCentered(
                 createPageSubtitle("Sélectionner votre profil"),
                 1,
-                new Insets(0, 0, 45, 0)
+                new Insets(0, 0, 10, 0)
+        );
+
+        addCentered(
+                new KitchenAnimationPanel(),
+                2,
+                new Insets(0, 0, 10, 0)
         );
 
         addCentered(
                 createRoleCardsPanel(),
-                2,
+                3,
                 new Insets(0, 0, 45, 0)
         );
 
         addCentered(
                 createSecondaryButtonsPanel(),
-                3,
+                4,
                 new Insets(0, 0, 0, 0)
         );
     }
