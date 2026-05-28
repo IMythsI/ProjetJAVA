@@ -13,11 +13,7 @@ public class Table {
 
     @Override
     public String toString() {
-        return "Table{" +
-                "idTabel=" + idTabel +
-                ", nbSeats=" + nbSeats +
-                ", status=" + status +
-                '}';
+        return "Table " + idTabel + " (" + nbSeats + " seats)";
     }
 
     public Integer getIdTable() {

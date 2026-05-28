@@ -16,6 +16,7 @@ public class ApplicationController {
     private ProductManager productManager;
     private OrderValidationManager orderValidationManager;
     private BookingManager bookingManager;
+    private SearchManager searchManager;
 
     public ApplicationController() {
         orderManager  = new OrderManager();
@@ -24,6 +25,7 @@ public class ApplicationController {
         productManager = new ProductManager();
         orderValidationManager = new OrderValidationManager();
         bookingManager = new BookingManager();
+        searchManager = new SearchManager();
     }
 
     public ArrayList<Order> getAllOrders() throws OrderException {
@@ -66,7 +68,61 @@ public class ApplicationController {
         return lineOrderManager.getLineOrdersByOrder(idOrder);
     }
 
+    //BOOKING
     public ArrayList<Book> getBookingsByDate(LocalDate date) throws BookingException {
         return bookingManager.getBookingsByDate(date);
+    }
+    public ArrayList<Book> getAllBookings() throws BookingException {
+        return bookingManager.getAllBookings();
+    }
+
+    public void addBooking(Book booking) throws BookingException {
+        bookingManager.addBooking(booking);
+    }
+
+    public void updateBooking(Book oldBooking, Book newBooking) throws BookingException {
+        bookingManager.updateBooking(oldBooking, newBooking);
+    }
+
+    public void deleteBooking(Book booking) throws BookingException {
+        bookingManager.deleteBooking(booking);
+    }
+
+    //SEARCH
+    public ArrayList<String> getBookingCustomerNames() throws SearchException {
+        return searchManager.getBookingCustomerNames();
+    }
+
+    public ArrayList<BookingSearchResult> searchBookingsByCustomerAndDate(String customerName, LocalDate date) throws SearchException {
+        return searchManager.searchBookingsByCustomerAndDate(customerName, date);
+    }
+
+    public ArrayList<String> getWaiterNames() throws SearchException {
+        return searchManager.getWaiterNames();
+    }
+
+    public ArrayList<String> getOrderStatusLabels() throws SearchException {
+        return searchManager.getOrderStatusLabels();
+    }
+
+    public ArrayList<OrderSearchResult> searchOrdersByWaiterAndStatus(String waiterName, String statusLabel) throws SearchException {
+        return searchManager.searchOrdersByWaiterAndStatus(waiterName, statusLabel);
+    }
+
+    public ArrayList<String> getProductTypes() throws SearchException {
+        return searchManager.getProductTypes();
+    }
+
+    public ArrayList<String> getAllergyLabels() throws SearchException {
+        return searchManager.getAllergyLabels();
+    }
+
+    public ArrayList<ProductSearchResult> searchProductsByTypeAndAllergy(String typeLabel, String allergyLabel) throws SearchException {
+        return searchManager.searchProductsByTypeAndAllergy(typeLabel, allergyLabel);
+    }
+
+    //Bussiness
+    public void validateBookingCapacity(Book booking) throws BookingException {
+        bookingManager.validateBookingCapacity(booking);
     }
 }

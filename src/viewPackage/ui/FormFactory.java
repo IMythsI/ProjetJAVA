@@ -1,17 +1,19 @@
 package viewPackage.ui;
 
-import viewPackage.ui.AppTheme;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class FormFactory {
 
+    public static final int FIELD_WIDTH = 360;
+    public static final int FIELD_HEIGHT = 30;
+
     public static JTextField createTextField() {
         JTextField field = new JTextField();
 
-        field.setPreferredSize(new Dimension(320, 44));
-        field.setFont(new Font("Arial", Font.PLAIN, 14));
+        field.setPreferredSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
+        field.setMinimumSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
+        field.setFont(new Font("Arial", Font.PLAIN, 15));
 
         field.putClientProperty(
                 "FlatLaf.style",
@@ -26,9 +28,11 @@ public class FormFactory {
     public static JTextArea createTextArea() {
         JTextArea area = new JTextArea();
 
-        area.setFont(new Font("Arial", Font.PLAIN, 14));
+        area.setFont(new Font("Arial", Font.PLAIN, 15));
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
+        area.setRows(4);
+        area.setMargin(new Insets(10, 12, 10, 12));
 
         return area;
     }
@@ -36,7 +40,18 @@ public class FormFactory {
     public static JComboBox<String> createComboBox() {
         JComboBox<String> comboBox = new JComboBox<>();
 
-        comboBox.setPreferredSize(new Dimension(220, 42));
+        comboBox.setPreferredSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
+        comboBox.setMinimumSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
+        comboBox.setFont(AppTheme.BUTTON_FONT);
+
+        return comboBox;
+    }
+
+    public static <T> JComboBox<T> createGenericComboBox() {
+        JComboBox<T> comboBox = new JComboBox<>();
+
+        comboBox.setPreferredSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
+        comboBox.setMinimumSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
         comboBox.setFont(AppTheme.BUTTON_FONT);
 
         return comboBox;
@@ -47,7 +62,8 @@ public class FormFactory {
                 new SpinnerNumberModel(value, min, max, 1)
         );
 
-        spinner.setPreferredSize(new Dimension(100, 42));
+        spinner.setPreferredSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
+        spinner.setMinimumSize(new Dimension(FIELD_WIDTH, FIELD_HEIGHT));
         spinner.setFont(AppTheme.BUTTON_FONT);
 
         return spinner;
@@ -67,7 +83,7 @@ public class FormFactory {
         gbc.gridy = row;
         gbc.weightx = 0;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.insets = new Insets(10, 8, 10, 8);
+        gbc.insets = new Insets(12, 8, 12, 18);
 
         panel.add(label, gbc);
 
