@@ -4,9 +4,8 @@ import controllerPackage.ApplicationController;
 import exceptionPackage.TableException;
 import modelPackage.Table;
 import viewPackage.AbstractPanel;
-import viewPackage.CardFactory;
 import viewPackage.MainJFrame;
-import viewPackage.ui.AppTheme;
+import viewPackage.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -170,7 +169,7 @@ public class TableListPanel extends AbstractPanel {
     }
 
     private JButton createTableCard(Table table) {
-        JButton card = new CardFactory.RoundedButton(25);
+        JButton card = new RoundedButton("", 25);
 
         String statusLabel = table.getStatus().getStatusLabel();
 

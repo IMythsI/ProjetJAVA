@@ -46,7 +46,7 @@ public class BookingListPanel extends AppPage {
         JButton nextButton = ButtonFactory.createSecondaryButton("›", this::nextDay);
         JButton newBookingButton = ButtonFactory.createPrimaryButton(
                 "+ Nouvelle réservation",
-                () -> JOptionPane.showMessageDialog(this, "Formulaire nouvelle réservation à créer.")
+                () -> mainWindow.showBookingFormPanel()
         );
 
         previousButton.setPreferredSize(new Dimension(45, 42));
@@ -140,12 +140,12 @@ public class BookingListPanel extends AppPage {
     private JPanel createBookingRow(Book booking) {
         JButton editButton = ButtonFactory.createSmallIconButton(
                 "✎",
-                () -> JOptionPane.showMessageDialog(this, "Modification à créer.")
+                () -> mainWindow.showBookingEditPanel(booking)
         );
 
         JButton deleteButton = ButtonFactory.createSmallIconButton(
                 "🗑",
-                () -> JOptionPane.showMessageDialog(this, "Suppression à créer.")
+                () -> confirmAndDeleteBooking(booking)
         );
 
         return TableFactory.createDataRow(
@@ -191,5 +191,46 @@ public class BookingListPanel extends AppPage {
 
     private void refreshDate() {
         dateLabel.setText(DateHelper.formatDate(selectedDate));
+    }
+
+    private void confirmAndDeleteBooking(Book booking) {
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Voulez-vous vraiment supprimer la réservation de "
+                        + booking.getNameCustomer()
+                        + " pour la table "
+                        + booking.getTable().getIdTable()
+                        + " à "
+                        + DateHelper.formatTime(booking.getBookHour())
+                        + " ?",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (choice != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            controller.deleteBooking(booking);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "La réservation a bien été supprimée.",
+                    "Suppression réussie",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            loadBookings();
+
+        } catch (BookingException exception) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    exception.getMessage(),
+                    "Erreur de suppression",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 }

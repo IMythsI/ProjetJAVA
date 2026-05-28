@@ -61,6 +61,8 @@ public class AppTheme {
     public static final Dimension SECONDARY_BUTTON_SIZE =
             new Dimension(160, 45);
 
+    public static final Color BORDER = new Color(210, 215, 220);
+
     private AppTheme() {
     }
 }

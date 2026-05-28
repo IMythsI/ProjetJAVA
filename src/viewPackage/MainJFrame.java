@@ -5,14 +5,16 @@ import viewPackage.Booking.*;
 import viewPackage.Dashboard.*;
 import viewPackage.Order.*;
 import viewPackage.Table.*;
+import viewPackage.Search.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.Stack;
 
 public class MainJFrame extends JFrame {
-    private Container frameContainer;
 
+    private JPanel mainPanelContainer;
     private Stack<JPanel> navigationStack;
 
     public MainJFrame() {
@@ -24,100 +26,249 @@ public class MainJFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        frameContainer = this.getContentPane();
-        frameContainer.setLayout(new BorderLayout());
+        mainPanelContainer = new JPanel(new BorderLayout());
 
-        //setJMenuBar(createMenuBar());
+        Container frameContainer = getContentPane();
+        frameContainer.setLayout(new BorderLayout());
+        frameContainer.add(mainPanelContainer, BorderLayout.CENTER);
+
+        setJMenuBar(createMenuBar());
+
         showWelcomePanel();
     }
 
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
-        JMenu orderMenu = new JMenu("Order");
-        JMenuItem listOrderItem = new JMenuItem("List Orders");
-        JMenuItem addOrderItem = new JMenuItem("New Order");
-
-        listOrderItem.addActionListener(e -> showOrderListPanel());
-
-        orderMenu.add(listOrderItem);
-        orderMenu.add(addOrderItem);
-
-        JMenu productMenu = new JMenu("Product");
-        productMenu.add(new JMenuItem("List Products"));
-        productMenu.add(new JMenuItem("New Product"));
-
-        JMenu bookingMenu = new JMenu("Bookings");
-        bookingMenu.add(new JMenuItem("List bookings"));
-        bookingMenu.add(new JMenuItem("New booking"));
-
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem mainItem = new JMenuItem("Main");
-        JMenuItem exitItem = new JMenuItem("Exit");
-        mainItem.addActionListener(event -> showWelcomePanel());
-        exitItem.addActionListener(event -> System.exit(0));
-        fileMenu.add(mainItem);
-        fileMenu.add(exitItem);
-
-        menuBar.add(fileMenu);
-        menuBar.add(orderMenu);
-        menuBar.add(productMenu);
-        menuBar.add(bookingMenu);
+        menuBar.add(createFileMenu());
+        menuBar.add(createBookingMenu());
+        menuBar.add(createSearchMenu());
+        menuBar.add(createBusinessMenu());
+        menuBar.add(createOrderMenu());
+        menuBar.add(createTableMenu());
 
         return menuBar;
     }
 
+    private JMenu createFileMenu() {
+        JMenu fileMenu = new JMenu("File");
+
+        JMenuItem homeItem = createMenuItem("Home", e -> showWelcomePanel());
+        JMenuItem exitItem = createMenuItem("Exit", e -> System.exit(0));
+
+        fileMenu.add(homeItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
+
+        return fileMenu;
+    }
+
+    private JMenu createBookingMenu() {
+        JMenu bookingMenu = new JMenu("Bookings");
+
+        JMenuItem listBookingsItem = createMenuItem(
+                "List bookings",
+                e -> showBookingListPanel()
+        );
+
+        JMenuItem addBookingItem = createMenuItem(
+                "New booking",
+                e -> showBookingFormPanel()
+        );
+
+        JMenuItem editBookingItem = createMenuItem(
+                "Edit booking",
+                e -> showBookingEditPanel()
+        );
+
+        JMenuItem deleteBookingItem = createMenuItem(
+                "Delete booking",
+                e -> showBookingDeletePanel()
+        );
+
+        bookingMenu.add(listBookingsItem);
+        bookingMenu.addSeparator();
+        bookingMenu.add(addBookingItem);
+        bookingMenu.add(editBookingItem);
+        bookingMenu.add(deleteBookingItem);
+
+        return bookingMenu;
+    }
+
+    private JMenu createSearchMenu() {
+        JMenu searchMenu = new JMenu("Search");
+
+        JMenuItem bookingSearchItem = createMenuItem(
+                "Bookings by customer and date",
+                e -> showBookingSearchPanel()
+        );
+
+        JMenuItem orderSearchItem = createMenuItem(
+                "Orders by waiter and status",
+                e -> showOrderSearchPanel()
+        );
+
+        JMenuItem productSearchItem = createMenuItem(
+                "Products by type and allergy",
+                e -> showProductSearchPanel()
+        );
+
+        searchMenu.add(bookingSearchItem);
+        searchMenu.add(orderSearchItem);
+        searchMenu.add(productSearchItem);
+
+        return searchMenu;
+    }
+
+    private JMenu createBusinessMenu() {
+        JMenu businessMenu = new JMenu("Business");
+
+        JMenuItem validateBookingItem = createMenuItem(
+                "Validate booking capacity",
+                e -> showBookingValidationPanel()
+        );
+
+        businessMenu.add(validateBookingItem);
+
+        return businessMenu;
+    }
+
+    private JMenu createOrderMenu() {
+        JMenu orderMenu = new JMenu("Orders");
+
+        JMenuItem orderCardsItem = createMenuItem(
+                "Current orders",
+                e -> showOrderCardsPanel()
+        );
+
+        JMenuItem orderListItem = createMenuItem(
+                "List orders",
+                e -> showOrderListPanel()
+        );
+
+        JMenuItem takeAwayOrderItem = createMenuItem(
+                "New takeaway order",
+                e -> showTakeAwayOrderFormPanel()
+        );
+
+        orderMenu.add(orderCardsItem);
+        orderMenu.add(orderListItem);
+        orderMenu.addSeparator();
+        orderMenu.add(takeAwayOrderItem);
+
+        return orderMenu;
+    }
+
+    private JMenu createTableMenu() {
+        JMenu tableMenu = new JMenu("Tables");
+
+        JMenuItem listTablesItem = createMenuItem(
+                "List tables",
+                e -> showTableListPanel()
+        );
+
+        tableMenu.add(listTablesItem);
+
+        return tableMenu;
+    }
+
+    private JMenuItem createMenuItem(String text, ActionListener listener) {
+        JMenuItem item = new JMenuItem(text);
+        item.addActionListener(listener);
+        return item;
+    }
+
     public void changePanel(JPanel panel) {
-        Component currentPanel = getContentPane();
-        if (currentPanel instanceof JPanel currentJPanel) {
-            navigationStack.push(currentJPanel);
+        Component currentComponent = null;
+
+        if (mainPanelContainer.getComponentCount() > 0) {
+            currentComponent = mainPanelContainer.getComponent(0);
         }
-        setContentPane(panel);
-        revalidate();
-        repaint();
+
+        if (currentComponent instanceof JPanel currentPanel) {
+            navigationStack.push(currentPanel);
+        }
+
+        mainPanelContainer.removeAll();
+        mainPanelContainer.add(panel, BorderLayout.CENTER);
+
+        mainPanelContainer.revalidate();
+        mainPanelContainer.repaint();
     }
 
     public void goBack() {
         if (!navigationStack.isEmpty()) {
             JPanel previousPanel = navigationStack.pop();
-            setContentPane(previousPanel);
-            revalidate();
-            repaint();
+
+            mainPanelContainer.removeAll();
+            mainPanelContainer.add(previousPanel, BorderLayout.CENTER);
+
+            mainPanelContainer.revalidate();
+            mainPanelContainer.repaint();
         }
     }
 
     public void showWelcomePanel() {
         navigationStack.clear();
-        setContentPane(new WelcomePanel(this));
-        revalidate();
-        repaint();
+
+        mainPanelContainer.removeAll();
+        mainPanelContainer.add(new WelcomePanel(this), BorderLayout.CENTER);
+
+        mainPanelContainer.revalidate();
+        mainPanelContainer.repaint();
     }
 
-    //Dashboard
+
     public void showWaiterPanel() {
         changePanel(new WaiterDashboardPanel(this));
     }
 
-    //Order
-    public void showOrderListPanel() {
-        changePanel(new OrderListPanel(this));
-    }
-
-    //Table
-    public void showTableDetailPanel(Table table) {
-        changePanel(new TableDetailPanel(this, table));
-    }
-
-    public void showTableListPanel() {
-        changePanel(new TableListPanel(this));
-    }
-
+    //BOOKING
     public void showBookingListPanel() {
         changePanel(new BookingListPanel(this));
     }
 
-    public void showAllergiesPanel() {
-        //changePanel(new RestaurantTableListPanel(this));
+    public void showBookingFormPanel() {
+        changePanel(new BookingFormPanel(this));
+    }
+
+    public void showBookingEditPanel(Book booking) {
+        changePanel(new BookingEditPanel(this, booking));
+    }
+
+    public void showBookingEditPanel() {
+        showNotImplementedMessage("Edit booking");
+    }
+
+    public void showBookingDeletePanel() {
+        showNotImplementedMessage("Delete booking");
+    }
+
+    //SEARCH
+    public void showBookingSearchPanel() {
+        changePanel(new BookingSearchPanel(this));
+    }
+
+    public void showOrderSearchPanel() {
+        changePanel(new OrderSearchPanel(this));
+    }
+
+    public void showProductSearchPanel() {
+        changePanel(new ProductSearchPanel(this));
+    }
+
+    //BUSINESS
+    public void showBookingValidationPanel() {
+        changePanel(new BookingValidationPanel(this));
+    }
+
+    //ORDER
+    public void showOrderListPanel() {
+        changePanel(new OrderListPanel(this));
+    }
+
+    public void showOrderCardsPanel() {
+        changePanel(new OrderCardsPanel(this));
     }
 
     public void showTakeAwayOrderFormPanel() {
@@ -132,7 +283,26 @@ public class MainJFrame extends JFrame {
         changePanel(new ProductSelectionPanel(this, table));
     }
 
-    public void showOrderCardsPanel() {
-        changePanel(new OrderCardsPanel(this));
+    //TABLE
+    public void showTableListPanel() {
+        changePanel(new TableListPanel(this));
+    }
+
+    public void showTableDetailPanel(Table table) {
+        changePanel(new TableDetailPanel(this, table));
+    }
+
+    //OTHER
+    public void showAllergiesPanel() {
+        showNotImplementedMessage("Allergies");
+    }
+
+    private void showNotImplementedMessage(String featureName) {
+        JOptionPane.showMessageDialog(
+                this,
+                featureName + " is not implemented yet.",
+                "Feature not implemented",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }
