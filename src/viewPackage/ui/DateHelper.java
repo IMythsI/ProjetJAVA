@@ -3,24 +3,50 @@ package viewPackage.ui;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
-public class DateHelper {
+public final class DateHelper {
+
+    private static final Locale FRENCH_LOCALE = Locale.FRENCH;
+
+    private static final DateTimeFormatter FULL_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd MMMM yyyy", FRENCH_LOCALE);
+
+    private static final DateTimeFormatter SHORT_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy", FRENCH_LOCALE);
+
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm", FRENCH_LOCALE);
+
+    private DateHelper() {
+        // Utility class
+    }
 
     public static String formatDate(LocalDate date) {
-        DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        if (date == null) {
+            return "-";
+        }
 
-        return date.format(formatter);
+        return date.format(FULL_DATE_FORMATTER);
+    }
+
+    public static String formatShortDate(LocalDate date) {
+        if (date == null) {
+            return "-";
+        }
+
+        return date.format(SHORT_DATE_FORMATTER);
     }
 
     public static String formatTime(LocalTime time) {
         if (time == null) {
-            return "";
+            return "-";
         }
 
-        DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("HH:mm");
+        return time.format(TIME_FORMATTER);
+    }
 
-        return time.format(formatter);
+    public static String formatDateTime(LocalDate date, LocalTime time) {
+        return formatShortDate(date) + " à " + formatTime(time);
     }
 }

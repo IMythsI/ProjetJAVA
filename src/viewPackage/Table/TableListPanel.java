@@ -1,9 +1,7 @@
 package viewPackage.Table;
 
 import controllerPackage.ApplicationController;
-import exceptionPackage.TableException;
 import modelPackage.Table;
-import viewPackage.AbstractPanel;
 import viewPackage.MainJFrame;
 import viewPackage.ui.*;
 
@@ -11,217 +9,256 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class TableListPanel extends AbstractPanel {
-    private ApplicationController controller;
-    private JPanel tablesPanel;
-    private ArrayList<Table> loadedTables;
+public class TableListPanel extends AppPage {
+
+    private static final int TABLE_CARD_WIDTH = 155;
+    private static final int TABLE_CARD_HEIGHT = 170;
+
+    private final ApplicationController controller;
+
+    private JPanel tablesCard;
+    private JPanel tablesContentPanel;
+
+    private int currentTableCount;
 
     public TableListPanel(MainJFrame mainWindow) {
-        super(mainWindow);
-        loadedTables = new ArrayList<>();
+        super(mainWindow, true);
 
         controller = new ApplicationController();
 
-        setLayout(new BorderLayout());
-        setBackground(AppTheme.BACKGROUND);
+        addCentered(
+                createPageTitle("Liste des tables"),
+                0,
+                new Insets(0, 0, 12, 0)
+        );
 
-        add(createHeader(), BorderLayout.NORTH);
-        add(createScrollableMainContent(), BorderLayout.CENTER);
+        addCentered(
+                createPageSubtitle("Consultez l’état des tables du restaurant"),
+                1,
+                new Insets(0, 0, 30, 0)
+        );
+
+        addCentered(
+                createTablesCardWrapper(),
+                2,
+                new Insets(0, 0, 25, 0)
+        );
+
+        addCentered(
+                createLegendPanel(),
+                3,
+                new Insets(0, 0, 0, 0)
+        );
 
         loadTables();
     }
 
-    private JScrollPane createScrollableMainContent() {
-        JPanel content = createMainContent();
+    private JPanel createTablesCardWrapper() {
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
 
-        JScrollPane scrollPane = new JScrollPane(content);
+        tablesCard = createTablesCard();
+        wrapper.add(tablesCard);
 
-        scrollPane.setBorder(null);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
-
-        scrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
-
-        return scrollPane;
-    }
-
-    private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setPreferredSize(new Dimension(0, 70));
-        header.setBackground(AppTheme.NAVBAR);
-        header.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 30));
-
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 17));
-        leftPanel.setOpaque(false);
-
-        JButton backButton = createBackButton();
-
-        JLabel title = new JLabel("Restaurant Manager");
-        title.setForeground(Color.WHITE);
-        title.setFont(AppTheme.NAVBAR_FONT);
-
-        leftPanel.add(backButton);
-        leftPanel.add(title);
-
-        header.add(leftPanel, BorderLayout.WEST);
-
-        return header;
-    }
-
-    private JPanel createMainContent() {
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setOpaque(false);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(35, 30, 35, 30));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        JLabel title = new JLabel("Liste des tables");
-        title.setFont(AppTheme.TITLE_FONT);
-        title.setForeground(AppTheme.TEXT_PRIMARY);
-
-        JLabel subtitle = new JLabel("État des tables en temps réel");
-        subtitle.setFont(AppTheme.SUBTITLE_FONT);
-        subtitle.setForeground(AppTheme.TEXT_SECONDARY);
-
-        tablesPanel = new JPanel();
-        tablesPanel.setOpaque(false);
-        tablesPanel.setPreferredSize(new Dimension(850, 450));
-
-        tablesPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
             public void componentResized(java.awt.event.ComponentEvent event) {
-                refreshTablesGrid();
+                resizeTablesCard(wrapper);
             }
         });
 
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 8, 0);
-        mainPanel.add(title, gbc);
+        return wrapper;
+    }
 
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 45, 0);
-        mainPanel.add(subtitle, gbc);
+    private JPanel createTablesCard() {
+        JPanel card = CardFactory.createAdaptiveCard(
+                AppTheme.TABLE_CARD_MAX_WIDTH,
+                AppTheme.TABLE_MIN_HEIGHT
+        );
 
-        gbc.gridy = 2;
-        gbc.insets = new Insets(0, 0, 35, 0);
-        mainPanel.add(tablesPanel, gbc);
+        card.setLayout(new BorderLayout());
 
-        gbc.gridy = 3;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        mainPanel.add(createLegendPanel(), gbc);
+        JLabel titleLabel = new JLabel("Tables du restaurant");
+        titleLabel.setFont(AppTheme.TEXT_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 18, 0));
 
-        return mainPanel;
+        tablesContentPanel = new JPanel(new BorderLayout());
+        tablesContentPanel.setOpaque(false);
+
+        LoadingHelper.showEmpty(
+                tablesContentPanel,
+                "Chargement des tables..."
+        );
+
+        card.add(titleLabel, BorderLayout.NORTH);
+        card.add(tablesContentPanel, BorderLayout.CENTER);
+
+        return card;
+    }
+
+    private void resizeTablesCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
+
+        int maxWidth = AppTheme.TABLE_CARD_MAX_WIDTH;
+        int minWidth = 100;
+        int horizontalMargin = 40;
+
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        tablesCard.setPreferredSize(new Dimension(
+                newWidth,
+                calculateTablesCardHeight(currentTableCount, newWidth)
+        ));
+
+        tablesCard.setMinimumSize(new Dimension(
+                minWidth,
+                AppTheme.TABLE_MIN_HEIGHT
+        ));
+
+        tablesCard.setMaximumSize(new Dimension(
+                maxWidth,
+                Integer.MAX_VALUE
+        ));
+
+        tablesCard.revalidate();
+        tablesCard.repaint();
     }
 
     private void loadTables() {
-        try {
-            loadedTables = controller.getAllTables();
-            refreshTablesGrid();
-
-        } catch (TableException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+        LoadingHelper.runWithLoading(
+                tablesContentPanel,
+                "Chargement des tables...",
+                controller::getAllTables,
+                this::displayTables,
+                this::displayLoadingError
+        );
     }
 
-    private void refreshTablesGrid() {
-        if (tablesPanel == null || loadedTables == null) {
+    private void displayTables(ArrayList<Table> tables) {
+        tablesContentPanel.removeAll();
+
+        if (tables == null || tables.isEmpty()) {
+            LoadingHelper.showEmpty(
+                    tablesContentPanel,
+                    "Aucune table à afficher."
+            );
             return;
         }
 
-        tablesPanel.removeAll();
+        JPanel gridPanel = new JPanel(new lib.WrapLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                AppTheme.COMPONENT_GAP_MEDIUM
+        ));
 
-        int cardWidth = 130;
-        int cardHeight = 160;
-        int gap = 25;
+        gridPanel.setOpaque(false);
 
-        int availableWidth = tablesPanel.getWidth();
-
-        if (availableWidth <= 0) {
-            availableWidth = 850;
+        for (Table table : tables) {
+            gridPanel.add(createTableCard(table));
         }
 
-        int columns = Math.max(1, availableWidth / (cardWidth + gap));
-        int rows = (int) Math.ceil((double) loadedTables.size() / columns);
+        currentTableCount = tables.size();
+        updateTablesCardHeight(tables.size());
 
-        tablesPanel.setLayout(new GridLayout(rows, columns, gap, gap));
+        tablesContentPanel.add(gridPanel, BorderLayout.CENTER);
+        tablesContentPanel.revalidate();
+        tablesContentPanel.repaint();
 
-        tablesPanel.setPreferredSize(
-                new Dimension(
-                        850,
-                        rows * cardHeight + Math.max(0, rows - 1) * gap
-                )
+        refreshPage();
+    }
+
+    private void updateTablesCardHeight(int tableCount) {
+        currentTableCount = tableCount;
+
+        int currentWidth = tablesCard.getPreferredSize().width;
+
+        tablesCard.setPreferredSize(new Dimension(
+                currentWidth,
+                calculateTablesCardHeight(tableCount, currentWidth)
+        ));
+
+        tablesCard.revalidate();
+        tablesCard.repaint();
+    }
+
+    private int calculateTablesCardHeight(int tableCount, int cardWidth) {
+        if (tableCount <= 0) {
+            return AppTheme.TABLE_MIN_HEIGHT;
+        }
+
+        int availableWidth = cardWidth
+                - AppTheme.CARD_PADDING_LEFT
+                - AppTheme.CARD_PADDING_RIGHT
+                - 40;
+
+        int cardWidthWithGap = TABLE_CARD_WIDTH + AppTheme.COMPONENT_GAP_MEDIUM;
+
+        int columns = Math.max(1, availableWidth / cardWidthWithGap);
+        int rows = (int) Math.ceil((double) tableCount / columns);
+
+        int titleHeight = 55;
+        int verticalPadding = AppTheme.CARD_PADDING_TOP + AppTheme.CARD_PADDING_BOTTOM;
+        int rowsHeight = rows * TABLE_CARD_HEIGHT;
+        int gapsHeight = Math.max(0, rows - 1) * AppTheme.COMPONENT_GAP_MEDIUM;
+
+        int totalHeight = titleHeight + verticalPadding + rowsHeight + gapsHeight + 30;
+
+        return Math.max(totalHeight, AppTheme.TABLE_MIN_HEIGHT);
+    }
+
+    private void displayLoadingError(Exception exception) {
+        LoadingHelper.showError(
+                tablesContentPanel,
+                "Impossible de charger les tables."
         );
 
-        for (Table table : loadedTables) {
-            tablesPanel.add(createTableCard(table));
-        }
-
-        tablesPanel.revalidate();
-        tablesPanel.repaint();
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de chargement",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private JButton createTableCard(Table table) {
-        JButton card = new RoundedButton("", 25);
+        JButton card = new RoundedButton("", AppTheme.CARD_ARC);
+
+        card.setLayout(new BorderLayout(
+                AppTheme.COMPONENT_GAP_SMALL,
+                AppTheme.COMPONENT_GAP_SMALL
+        ));
+
+        card.setPreferredSize(new Dimension(TABLE_CARD_WIDTH, TABLE_CARD_HEIGHT));
+        card.setMinimumSize(new Dimension(TABLE_CARD_WIDTH, TABLE_CARD_HEIGHT));
+        card.setBackground(AppTheme.CARD);
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        card.setBorder(BorderFactory.createEmptyBorder(18, 16, 18, 16));
 
         String statusLabel = table.getStatus().getStatusLabel();
 
-        card.setLayout(new BorderLayout(5, 8));
-
-        card.setPreferredSize(new Dimension(130, 160));
-        card.setMinimumSize(new Dimension(130, 160));
-        card.setMaximumSize(new Dimension(130, 160));
-
-        card.setBackground(AppTheme.CARD);
-
-        card.setContentAreaFilled(false);
-        card.setOpaque(false);
-
-        card.setFocusPainted(false);
-        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-
-        JLabel icon = new JLabel("\uD83E\uDE91", SwingConstants.CENTER);
-        icon.setPreferredSize(new Dimension(35, 35));
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 26));
-        icon.setForeground(AppTheme.PRIMARY);
+        JLabel iconLabel = new JLabel("🪑", SwingConstants.CENTER);
+        iconLabel.setFont(AppTheme.EMOJI_FONT);
+        iconLabel.setPreferredSize(AppTheme.SMALL_ICON_BUTTON_SIZE);
+        iconLabel.setForeground(AppTheme.PRIMARY);
 
         JLabel tableLabel = new JLabel("Table " + table.getIdTable(), SwingConstants.CENTER);
-        tableLabel.setFont(AppTheme.BUTTON_FONT);
+        tableLabel.setFont(AppTheme.TEXT_BOLD_FONT);
         tableLabel.setForeground(AppTheme.TEXT_PRIMARY);
 
         JLabel seatsLabel = new JLabel(table.getNbSeats() + " places", SwingConstants.CENTER);
-        seatsLabel.setFont(AppTheme.SUBTITLE_FONT);
+        seatsLabel.setFont(AppTheme.TEXT_FONT);
         seatsLabel.setForeground(AppTheme.TEXT_SECONDARY);
 
-        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
-        statusPanel.setOpaque(false);
-
-        JLabel dot = new JLabel("\uD83D\uDD18");
-        dot.setForeground(getColorByStatus(statusLabel));
-
-        JLabel statusText = new JLabel(getFrenchStatus(statusLabel));
-        statusText.setFont(AppTheme.BUTTON_FONT);
-        statusText.setForeground(AppTheme.TEXT_PRIMARY);
-
-        statusPanel.add(dot);
-        statusPanel.add(statusText);
-
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 5));
+        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 6));
         centerPanel.setOpaque(false);
         centerPanel.add(tableLabel);
         centerPanel.add(seatsLabel);
 
-        card.add(icon, BorderLayout.NORTH);
+        JPanel statusPanel = createStatusPanel(statusLabel);
+
+        card.add(iconLabel, BorderLayout.NORTH);
         card.add(centerPanel, BorderLayout.CENTER);
         card.add(statusPanel, BorderLayout.SOUTH);
 
@@ -230,55 +267,65 @@ public class TableListPanel extends AbstractPanel {
         return card;
     }
 
+    private JPanel createStatusPanel(String statusLabel) {
+        JPanel panel = new JPanel(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_SMALL,
+                0
+        ));
+
+        panel.setOpaque(false);
+
+        JLabel dotLabel = new JLabel("●");
+        dotLabel.setFont(AppTheme.TEXT_BOLD_FONT);
+        dotLabel.setForeground(StatusHelper.getStatusColor(statusLabel));
+
+        JLabel textLabel = new JLabel(StatusHelper.getFrenchStatus(statusLabel));
+        textLabel.setFont(AppTheme.TEXT_BOLD_FONT);
+        textLabel.setForeground(AppTheme.TEXT_PRIMARY);
+
+        panel.add(dotLabel);
+        panel.add(textLabel);
+
+        return panel;
+    }
+
     private JPanel createLegendPanel() {
-        JPanel legend = new JPanel(new FlowLayout(FlowLayout.CENTER, 35, 0));
+        JPanel legend = CardFactory.createAdaptiveCard(650, 70);
 
-        legend.setBackground(AppTheme.CARD);
-        legend.setPreferredSize(new Dimension(620, 50));
-        legend.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-        legend.putClientProperty("FlatLaf.style", "arc:18");
+        legend.setLayout(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_LARGE,
+                AppTheme.COMPONENT_GAP_SMALL
+        ));
 
-        legend.add(createLegendItem("Libre", new Color(70, 191, 70)));
-        legend.add(createLegendItem("Occupée", new Color(230, 78, 78)));
-        legend.add(createLegendItem("Réservée", new Color(255, 167, 49)));
-        legend.add(createLegendItem("Hors service", Color.LIGHT_GRAY));
+        legend.add(createLegendItem("Libre", StatusHelper.getStatusColor("Available")));
+        legend.add(createLegendItem("Réservée", StatusHelper.getStatusColor("Reserved")));
+        legend.add(createLegendItem("Occupée", StatusHelper.getStatusColor("Occupied")));
 
         return legend;
     }
 
     private JPanel createLegendItem(String text, Color color) {
-        JPanel item = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 13));
+        JPanel item = new JPanel(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_SMALL,
+                0
+        ));
+
         item.setOpaque(false);
 
-        JLabel dot = new JLabel("●");
-        dot.setForeground(color);
-        dot.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel dotLabel = new JLabel("●");
+        dotLabel.setFont(AppTheme.TEXT_BOLD_FONT);
+        dotLabel.setForeground(color);
 
-        JLabel label = new JLabel(text);
-        label.setFont(AppTheme.BUTTON_FONT);
-        label.setForeground(AppTheme.TEXT_PRIMARY);
+        JLabel textLabel = new JLabel(text);
+        textLabel.setFont(AppTheme.TEXT_FONT);
+        textLabel.setForeground(AppTheme.TEXT_PRIMARY);
 
-        item.add(dot);
-        item.add(label);
+        item.add(dotLabel);
+        item.add(textLabel);
 
         return item;
-    }
-
-    private Color getColorByStatus(String statusLabel) {
-        return switch (statusLabel) {
-            case "Available" -> new Color(70, 191, 70);
-            case "Reserved" -> new Color(255, 167, 49);
-            case "Occupied" -> new Color(230, 78, 78);
-            default -> Color.LIGHT_GRAY;
-        };
-    }
-
-    private String getFrenchStatus(String statusLabel) {
-        return switch (statusLabel) {
-            case "Available" -> "Libre";
-            case "Reserved" -> "Réservée";
-            case "Occupied" -> "Occupée";
-            default -> "Hors service";
-        };
     }
 }

@@ -2,54 +2,85 @@ package viewPackage.Order;
 
 import modelPackage.Order;
 import viewPackage.MainJFrame;
-import viewPackage.ui.AppPage;
-import viewPackage.ui.ButtonFactory;
-import viewPackage.ui.CardFactory;
-import viewPackage.ui.FormFactory;
-import viewPackage.ui.AppTheme;
+import viewPackage.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Hashtable;
 
 public class TakeAwayOrderFormPanel extends AppPage {
-    private JTextField nameCustomerField;
-    private JTextField telCustomerField;
-    private JTextField commentField;
-    private JSlider pickUpTimeSlider;
-    private JLabel pickUpTimeValueLabel;
+
+    private JPanel formCard;
+
+    private JTextField customerNameField;
+    private JTextField phoneField;
+    private JSpinner guestCountSpinner;
+    private JComboBox<String> pickUpTimeComboBox;
+    private JTextArea commentArea;
 
     public TakeAwayOrderFormPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
 
-        addCentered(createPageTitle("Nouvelle commande à emporter"), 0, new Insets(0, 0, 6, 0));
-        addCentered(createPageSubtitle("Renseigner les informations du client"), 1, new Insets(0, 0, 25, 0));
-        addCentered(createFormCard(), 2, new Insets(0, 0, 0, 0));
+        addCentered(
+                createPageTitle("Nouvelle commande à emporter"),
+                0,
+                new Insets(0, 0, 12, 0)
+        );
+
+        addCentered(
+                createPageSubtitle("Renseignez les informations du client"),
+                1,
+                new Insets(0, 0, 30, 0)
+        );
+
+        addCentered(
+                createFormCardWrapper(),
+                2,
+                new Insets(0, 0, 0, 0)
+        );
+    }
+
+    private JPanel createFormCardWrapper() {
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
+
+        formCard = createFormCard();
+        wrapper.add(formCard);
+
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeFormCard(wrapper);
+            }
+        });
+
+        return wrapper;
     }
 
     private JPanel createFormCard() {
-        JPanel card = CardFactory.createCard(500, 350);
-        card.setBorder(BorderFactory.createEmptyBorder(15, 35, 15, 35));
+        JPanel card = CardFactory.createAdaptiveCard(AppTheme.FORM_CARD_MAX_WIDTH, 540);
+        card.setLayout(new BorderLayout());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
+        formPanel.setBorder(BorderFactory.createEmptyBorder(
+                AppTheme.CARD_PADDING_TOP,
+                AppTheme.CARD_PADDING_LEFT,
+                AppTheme.CARD_PADDING_BOTTOM,
+                AppTheme.CARD_PADDING_RIGHT
+        ));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(14, 8, 14, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        nameCustomerField = FormFactory.createTextField();
-        telCustomerField = FormFactory.createTextField();
-        commentField = FormFactory.createTextField();
+        createFormFields();
 
-        JPanel timePanel = createTimeSliderPanel();
-
-        addFormRow(formPanel, gbc, 0, "Nom client *", nameCustomerField, 40);
-        addFormRow(formPanel, gbc, 1, "Téléphone", telCustomerField, 40);
-        addFormRow(formPanel, gbc, 2, "Heure de retrait *", timePanel, 110);
-        addFormRow(formPanel, gbc, 3, "Commentaire", commentField, 40);
+        FormFactory.addFormRow(formPanel, constraints, 0, "Nom du client *", customerNameField);
+        FormFactory.addFormRow(formPanel, constraints, 1, "Téléphone", phoneField);
+        FormFactory.addFormRow(formPanel, constraints, 2, "Personnes *", guestCountSpinner);
+        FormFactory.addFormRow(formPanel, constraints, 3, "Heure de retrait *", pickUpTimeComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 4, "Commentaire", FormFactory.createTextAreaScrollPane(commentArea));
 
         card.add(formPanel, BorderLayout.CENTER);
         card.add(createButtonPanel(), BorderLayout.SOUTH);
@@ -57,150 +88,173 @@ public class TakeAwayOrderFormPanel extends AppPage {
         return card;
     }
 
-    private JPanel createTimeSliderPanel() {
-        LocalTime now = LocalTime.now();
-
-        int currentMinutes = now.getHour() * 60 + now.getMinute();
-        currentMinutes = Math.round(currentMinutes / 15f) * 15;
-
-        pickUpTimeSlider = new JSlider(0, 24 * 60, currentMinutes);
-        pickUpTimeSlider.setPreferredSize(new Dimension(460, 100));
-
-        pickUpTimeSlider.setMajorTickSpacing(6 * 60);
-        pickUpTimeSlider.setMinorTickSpacing(15);
-        pickUpTimeSlider.setPaintTicks(true);
-        pickUpTimeSlider.setPaintLabels(true);
-        pickUpTimeSlider.setSnapToTicks(true);
-
-        Hashtable<Integer, JLabel> labels = new Hashtable<>();
-        labels.put(0, new JLabel("00h"));
-        labels.put(6 * 60, new JLabel("06h"));
-        labels.put(12 * 60, new JLabel("12h"));
-        labels.put(18 * 60, new JLabel("18h"));
-        labels.put(24 * 60, new JLabel("24h"));
-
-        pickUpTimeSlider.setLabelTable(labels);
-
-        pickUpTimeValueLabel = new JLabel(formatTimeFromSlider(), SwingConstants.CENTER);
-        pickUpTimeValueLabel.setFont(new Font("Arial", Font.BOLD, 22));
-        pickUpTimeValueLabel.setForeground(AppTheme.PRIMARY);
-        pickUpTimeValueLabel.setPreferredSize(new Dimension(85, 40));
-
-        pickUpTimeSlider.addChangeListener(event ->
-                pickUpTimeValueLabel.setText(formatTimeFromSlider())
-        );
-
-        JPanel timePanel = new JPanel(new BorderLayout(20, 0));
-        timePanel.setOpaque(false);
-
-        timePanel.add(pickUpTimeSlider, BorderLayout.CENTER);
-        timePanel.add(pickUpTimeValueLabel, BorderLayout.EAST);
-
-        return timePanel;
+    private void createFormFields() {
+        customerNameField = FormFactory.createTextField();
+        phoneField = FormFactory.createTextField();
+        guestCountSpinner = FormFactory.createNumberSpinner(1, 50, 1);
+        pickUpTimeComboBox = createPickUpTimeComboBox();
+        commentArea = FormFactory.createTextArea();
     }
 
-    private void addFormRow(JPanel panel, GridBagConstraints gbc, int row,
-                            String labelText, JComponent field, int height) {
-        JLabel label = new JLabel(labelText);
-        label.setFont(AppTheme.BUTTON_FONT);
-        label.setForeground(AppTheme.TEXT_PRIMARY);
+    private JComboBox<String> createPickUpTimeComboBox() {
+        JComboBox<String> comboBox = FormFactory.createComboBox();
 
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.EAST;
+        for (int hour = 11; hour <= 22; hour++) {
+            comboBox.addItem(String.format("%02d:00", hour));
+            comboBox.addItem(String.format("%02d:15", hour));
+            comboBox.addItem(String.format("%02d:30", hour));
+            comboBox.addItem(String.format("%02d:45", hour));
+        }
 
-        panel.add(label, gbc);
+        comboBox.setSelectedItem(getDefaultPickUpTime());
 
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        return comboBox;
+    }
 
-        field.setPreferredSize(new Dimension(460, height));
+    private String getDefaultPickUpTime() {
+        LocalTime now = LocalTime.now().plusMinutes(30);
 
-        panel.add(field, gbc);
+        int minute = now.getMinute();
+        int roundedMinute = ((minute + 14) / 15) * 15;
+
+        int hour = now.getHour();
+
+        if (roundedMinute == 60) {
+            hour++;
+            roundedMinute = 0;
+        }
+
+        if (hour < 11 || hour > 22) {
+            return "19:00";
+        }
+
+        return String.format("%02d:%02d", hour, roundedMinute);
     }
 
     private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
-        buttonPanel.setOpaque(false);
+        JPanel buttonPanel = new JPanel(new FlowLayout(
+                FlowLayout.RIGHT,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                AppTheme.COMPONENT_GAP_MEDIUM
+        ));
 
-        buttonPanel.add(ButtonFactory.createSecondaryButton("Annuler", () -> mainWindow.goBack()));
-        buttonPanel.add(ButtonFactory.createPrimaryButton("Choisir les produits", this::goToProductSelection));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 20));
+
+        JButton cancelButton = ButtonFactory.createSecondaryButton(
+                "Annuler",
+                () -> mainWindow.goBack()
+        );
+
+        JButton nextButton = ButtonFactory.createPrimaryButton(
+                "Choisir les produits",
+                this::goToProductSelection
+        );
+
+        nextButton.setPreferredSize(new Dimension(220, AppTheme.BUTTON_HEIGHT));
+
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(nextButton);
 
         return buttonPanel;
     }
 
-    private String formatTimeFromSlider() {
-        int totalMinutes = pickUpTimeSlider.getValue();
+    private void resizeFormCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
 
-        int hours = totalMinutes / 60;
-        int minutes = totalMinutes % 60;
+        int maxWidth = AppTheme.FORM_CARD_MAX_WIDTH;
+        int minWidth = 620;
+        int horizontalMargin = 40;
 
-        if (hours == 24) {
-            hours = 0;
-        }
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
 
-        return String.format("%02d:%02d", hours, minutes);
+        formCard.setPreferredSize(new Dimension(newWidth, 540));
+        formCard.setMinimumSize(new Dimension(minWidth, 500));
+        formCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        formCard.revalidate();
+        formCard.repaint();
     }
 
     private void goToProductSelection() {
         try {
+            validateForm();
+
             Order order = createTakeAwayOrderFromForm();
+
             mainWindow.showProductSelectionPanel(order);
 
         } catch (IllegalArgumentException exception) {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE
+                    "Erreur de validation",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
+    }
+
+    private void validateForm() {
+        String customerName = customerNameField.getText().trim();
+
+        if (customerName.isEmpty()) {
+            throw new IllegalArgumentException("Le nom du client est obligatoire.");
+        }
+
+        Integer guestCount = (Integer) guestCountSpinner.getValue();
+
+        if (guestCount == null || guestCount <= 0) {
+            throw new IllegalArgumentException("Le nombre de personnes doit être supérieur à 0.");
+        }
+
+        if (pickUpTimeComboBox.getSelectedItem() == null) {
+            throw new IllegalArgumentException("L'heure de retrait est obligatoire.");
+        }
+
+        validatePhoneIfPresent();
+    }
+
+    private void validatePhoneIfPresent() {
+        String phone = phoneField.getText().trim();
+
+        if (phone.isEmpty()) {
+            return;
+        }
+
+        if (!phone.matches("[0-9+ ]{6,20}")) {
+            throw new IllegalArgumentException(
+                    "Le numéro de téléphone doit contenir uniquement des chiffres, des espaces ou le signe +."
             );
         }
     }
 
     private Order createTakeAwayOrderFromForm() {
-        String nameCustomer = getRequiredText(nameCustomerField.getText(), "Nom client");
-        String telCustomer = emptyToNull(telCustomerField.getText());
-        String comment = emptyToNull(commentField.getText());
+        String customerName = customerNameField.getText().trim();
+        String phone = getNullableText(phoneField.getText());
+        String comment = getNullableText(commentArea.getText());
 
-        int totalMinutes = pickUpTimeSlider.getValue();
-
-        int hours = totalMinutes / 60;
-        int minutes = totalMinutes % 60;
-
-        if (hours == 24) {
-            hours = 0;
-        }
-
-        LocalTime pickUpTime = LocalTime.of(hours, minutes);
+        Integer guestCount = (Integer) guestCountSpinner.getValue();
+        LocalTime pickUpTime = LocalTime.parse((String) pickUpTimeComboBox.getSelectedItem());
 
         return new Order(
                 null,
                 comment,
-                1,
+                guestCount,
                 LocalDate.now(),
                 true,
                 pickUpTime,
-                nameCustomer,
-                telCustomer,
+                customerName,
+                phone,
                 null
         );
     }
 
-    private String getRequiredText(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " est obligatoire.");
-        }
-
-        return value.trim();
-    }
-
-    private String emptyToNull(String value) {
-        if (value == null || value.isBlank()) {
+    private String getNullableText(String text) {
+        if (text == null || text.trim().isEmpty()) {
             return null;
         }
 
-        return value.trim();
+        return text.trim();
     }
 }

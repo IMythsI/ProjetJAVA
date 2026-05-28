@@ -1,10 +1,10 @@
 package viewPackage.Order;
 
 import controllerPackage.ApplicationController;
-import modelPackage.*;
-import viewPackage.AbstractPanel;
+import modelPackage.LineOrder;
+import modelPackage.Order;
 import viewPackage.MainJFrame;
-import viewPackage.ui.AppTheme;
+import viewPackage.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,130 +12,85 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OrderCardsPanel extends AbstractPanel {
-    private ApplicationController controller;
+public class OrderCardsPanel extends AppPage {
+
+    private static final String FILTER_ALL = "Toutes";
+    private static final String FILTER_PREPARATION = "En préparation";
+    private static final String FILTER_READY = "Prêtes";
+    private static final String FILTER_SERVED = "Servies";
+
+    private final ApplicationController controller;
 
     private JButton allButton;
     private JButton preparationButton;
     private JButton readyButton;
     private JButton servedButton;
-    private JButton refreshButton;
 
-    private JPanel ordersListPanel;
+    private JPanel wrapper;
+
     private JPanel ordersCard;
+    private JPanel ordersRowsPanel;
 
     private ArrayList<Order> orders;
     private Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder;
 
-    private String selectedFilter = "Toutes";
+    private String selectedFilter;
 
     public OrderCardsPanel(MainJFrame mainWindow) {
-        super(mainWindow);
+        super(mainWindow, true);
 
         controller = new ApplicationController();
         orders = new ArrayList<>();
         lineOrdersByOrder = new HashMap<>();
+        selectedFilter = FILTER_ALL;
 
-        setLayout(new BorderLayout());
-        setBackground(AppTheme.BACKGROUND);
+        addCentered(
+                createPageTitle("Commandes en cours"),
+                0,
+                new Insets(0, 0, 12, 0)
+        );
 
-        add(createHeader(), BorderLayout.NORTH);
-        add(createScrollableMainPanel(), BorderLayout.CENTER);
+        addCentered(
+                createPageSubtitle("Suivi des commandes du restaurant"),
+                1,
+                new Insets(0, 0, 30, 0)
+        );
+
+        addCentered(
+                createFilterPanel(),
+                2,
+                new Insets(0, 0, 25, 0)
+        );
+
+        addCentered(
+                createOrdersCardWrapper(),
+                3,
+                new Insets(0, 0, 0, 0)
+        );
 
         loadOrders();
     }
 
-    private JScrollPane createScrollableMainPanel() {
-        JScrollPane scrollPane = new JScrollPane(createMainPanel());
-
-        scrollPane.setBorder(null);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
-        scrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
-
-        return scrollPane;
-    }
-
-    private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-
-        header.setPreferredSize(new Dimension(0, 70));
-        header.setBackground(AppTheme.NAVBAR);
-        header.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 30));
-
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 17));
-        leftPanel.setOpaque(false);
-
-        JButton backButton = createBackButton();
-
-        JLabel title = new JLabel("Restaurant Manager");
-        title.setForeground(Color.WHITE);
-        title.setFont(AppTheme.NAVBAR_FONT);
-
-        leftPanel.add(backButton);
-        leftPanel.add(title);
-
-        header.add(leftPanel, BorderLayout.WEST);
-
-        return header;
-    }
-
-    private JPanel createMainPanel() {
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-
-        mainPanel.setOpaque(false);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(35, 30, 35, 30));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        JLabel title = new JLabel("Commandes en cours");
-        title.setFont(AppTheme.TITLE_FONT);
-        title.setForeground(AppTheme.TEXT_PRIMARY);
-
-        JLabel subtitle = new JLabel("Suivi des commandes en temps réel");
-        subtitle.setFont(AppTheme.SUBTITLE_FONT);
-        subtitle.setForeground(AppTheme.TEXT_SECONDARY);
-
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 8, 0);
-        mainPanel.add(title, gbc);
-
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 35, 0);
-        mainPanel.add(subtitle, gbc);
-
-        gbc.gridy = 2;
-        gbc.insets = new Insets(0, 0, 20, 0);
-        mainPanel.add(createFilterPanel(), gbc);
-
-        gbc.gridy = 3;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        mainPanel.add(createOrdersCard(), gbc);
-
-        return mainPanel;
-    }
-
     private JPanel createFilterPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 55, 0));
+        JPanel panel = new JPanel(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                AppTheme.COMPONENT_GAP_SMALL
+        ));
 
         panel.setOpaque(false);
-        panel.setPreferredSize(new Dimension(900, 45));
 
-        allButton = createFilterButton("Toutes");
-        preparationButton = createFilterButton("En préparation");
-        readyButton = createFilterButton("Prêtes");
-        servedButton = createFilterButton("Servies");
+        allButton = createFilterButton(FILTER_ALL);
+        preparationButton = createFilterButton(FILTER_PREPARATION);
+        readyButton = createFilterButton(FILTER_READY);
+        servedButton = createFilterButton(FILTER_SERVED);
 
-        refreshButton = new JButton("Actualiser");
-        refreshButton.setFont(AppTheme.BUTTON_FONT);
-        refreshButton.setFocusPainted(false);
-        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        refreshButton.putClientProperty("JButton.buttonType", "roundRect");
-        refreshButton.addActionListener(event -> loadOrders());
+        JButton refreshButton = ButtonFactory.createSecondaryButton(
+                "Actualiser",
+                this::loadOrders
+        );
+
+        refreshButton.setPreferredSize(new Dimension(150, AppTheme.BUTTON_HEIGHT));
 
         panel.add(allButton);
         panel.add(preparationButton);
@@ -149,14 +104,14 @@ public class OrderCardsPanel extends AbstractPanel {
     }
 
     private JButton createFilterButton(String text) {
-        JButton button = new JButton(text);
+        JButton button = new RoundedButton(text, AppTheme.SMALL_BUTTON_ARC);
+
+        button.setPreferredSize(new Dimension(155, AppTheme.BUTTON_HEIGHT));
+        button.setMinimumSize(new Dimension(130, AppTheme.BUTTON_HEIGHT));
 
         button.setFont(AppTheme.BUTTON_FONT);
-        button.setForeground(AppTheme.TEXT_SECONDARY);
-        button.setBackground(AppTheme.BACKGROUND);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         button.addActionListener(event -> {
             selectedFilter = text;
@@ -168,200 +123,199 @@ public class OrderCardsPanel extends AbstractPanel {
     }
 
     private void updateFilterButtons() {
-        styleFilterButton(allButton, selectedFilter.equals("Toutes"));
-        styleFilterButton(preparationButton, selectedFilter.equals("En préparation"));
-        styleFilterButton(readyButton, selectedFilter.equals("Prêtes"));
-        styleFilterButton(servedButton, selectedFilter.equals("Servies"));
+        styleFilterButton(allButton, selectedFilter.equals(FILTER_ALL));
+        styleFilterButton(preparationButton, selectedFilter.equals(FILTER_PREPARATION));
+        styleFilterButton(readyButton, selectedFilter.equals(FILTER_READY));
+        styleFilterButton(servedButton, selectedFilter.equals(FILTER_SERVED));
     }
 
     private void styleFilterButton(JButton button, boolean selected) {
         if (selected) {
-            button.setForeground(AppTheme.PRIMARY);
-            button.setBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, AppTheme.PRIMARY));
+            button.setForeground(Color.WHITE);
+            button.setBackground(AppTheme.PRIMARY);
         } else {
             button.setForeground(AppTheme.TEXT_SECONDARY);
-            button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+            button.setBackground(Color.WHITE);
         }
+    }
+
+    private JPanel createOrdersCardWrapper() {
+        wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
+
+        ordersCard = createOrdersCard();
+        wrapper.add(ordersCard);
+
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeOrdersCard(wrapper);
+            }
+        });
+
+        return wrapper;
     }
 
     private JPanel createOrdersCard() {
-        ordersCard = new JPanel(new BorderLayout());
+        JPanel card = TableFactory.createTableCard(
+                AppTheme.TABLE_CARD_MAX_WIDTH,
+                AppTheme.TABLE_MIN_HEIGHT
+        );
 
-        ordersCard.setBackground(AppTheme.CARD);
-        ordersCard.setBorder(BorderFactory.createEmptyBorder(18, 25, 18, 25));
-        ordersCard.putClientProperty("FlatLaf.style", "arc:20");
+        card.add(
+                TableFactory.createHeaderRow(
+                        "Origine",
+                        "Produits",
+                        "Date",
+                        "Heure",
+                        "Statut",
+                        "Actions"
+                ),
+                BorderLayout.NORTH
+        );
 
-        ordersListPanel = new JPanel();
-        ordersListPanel.setBackground(Color.WHITE);
-        ordersListPanel.setLayout(new BoxLayout(ordersListPanel, BoxLayout.Y_AXIS));
+        ordersRowsPanel = new JPanel();
+        ordersRowsPanel.setOpaque(false);
+        ordersRowsPanel.setLayout(new BoxLayout(ordersRowsPanel, BoxLayout.Y_AXIS));
 
-        ordersCard.add(ordersListPanel, BorderLayout.CENTER);
+        card.add(ordersRowsPanel, BorderLayout.CENTER);
 
-        updateOrdersCardSize(0);
-
-        return ordersCard;
+        return card;
     }
 
-    private void updateOrdersCardSize(int displayedCount) {
-        int height = 80 + displayedCount * 72;
+    private void resizeOrdersCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
 
-        if (height < 420) {
-            height = 420;
-        }
+        int maxWidth = AppTheme.TABLE_CARD_MAX_WIDTH;
+        int minWidth = 780;
+        int horizontalMargin = 40;
 
-        ordersCard.setPreferredSize(new Dimension(850, height));
-        ordersCard.setMinimumSize(new Dimension(800, 420));
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        int currentHeight = ordersCard.getPreferredSize().height;
+
+        ordersCard.setPreferredSize(new Dimension(newWidth, currentHeight));
+        ordersCard.setMinimumSize(new Dimension(minWidth, AppTheme.TABLE_MIN_HEIGHT));
+        ordersCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        ordersCard.revalidate();
+        ordersCard.repaint();
     }
 
     private void loadOrders() {
-        showLoading();
-
-        SwingWorker<OrderCardsData, Void> worker = new SwingWorker<>() {
-            @Override
-            protected OrderCardsData doInBackground() throws Exception {
-                ArrayList<Order> loadedOrders = controller.getAllOrders();
-                Map<Integer, ArrayList<LineOrder>> loadedLines = new HashMap<>();
-
-                for (Order order : loadedOrders) {
-                    loadedLines.put(
-                            order.getIdOrder(),
-                            controller.getLineOrdersByOrder(order.getIdOrder())
-                    );
-                }
-
-                return new OrderCardsData(loadedOrders, loadedLines);
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    OrderCardsData data = get();
-
-                    orders = data.orders;
-                    lineOrdersByOrder = data.lineOrdersByOrder;
-
-                    refreshOrdersList();
-
-                } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
-                            OrderCardsPanel.this,
-                            "Erreur lors du chargement des commandes.",
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
-            }
-        };
-
-        worker.execute();
+        LoadingHelper.runWithLoading(
+                ordersRowsPanel,
+                "Chargement des commandes...",
+                this::loadOrderCardsData,
+                this::displayOrderCardsData,
+                this::displayLoadingError
+        );
     }
 
-    private void showLoading() {
-        if (ordersListPanel == null) {
-            return;
+    private OrderCardsData loadOrderCardsData() throws Exception {
+        ArrayList<Order> loadedOrders = controller.getAllOrders();
+        Map<Integer, ArrayList<LineOrder>> loadedLineOrders = new HashMap<>();
+
+        for (Order order : loadedOrders) {
+            loadedLineOrders.put(
+                    order.getIdOrder(),
+                    controller.getLineOrdersByOrder(order.getIdOrder())
+            );
         }
 
-        ordersListPanel.removeAll();
+        return new OrderCardsData(loadedOrders, loadedLineOrders);
+    }
 
-        JLabel loadingLabel = new JLabel("Chargement des commandes...", SwingConstants.CENTER);
-        loadingLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        loadingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    private void displayOrderCardsData(OrderCardsData data) {
+        orders = data.getOrders();
+        lineOrdersByOrder = data.getLineOrdersByOrder();
 
-        ordersListPanel.add(Box.createVerticalStrut(30));
-        ordersListPanel.add(loadingLabel);
+        refreshOrdersList();
+    }
 
-        ordersListPanel.revalidate();
-        ordersListPanel.repaint();
+    private void displayLoadingError(Exception exception) {
+        LoadingHelper.showError(
+                ordersRowsPanel,
+                "Impossible de charger les commandes."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de chargement",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private void refreshOrdersList() {
-        ordersListPanel.removeAll();
+        ordersRowsPanel.removeAll();
 
         int displayedCount = 0;
 
         for (Order order : orders) {
             if (mustDisplayOrder(order)) {
-                ordersListPanel.add(createOrderRow(order));
+                ordersRowsPanel.add(createOrderRow(order));
                 displayedCount++;
             }
         }
 
-        updateOrdersCardSize(displayedCount);
+        if (displayedCount == 0) {
+            LoadingHelper.showEmpty(
+                    ordersRowsPanel,
+                    "Aucune commande à afficher."
+            );
+        } else {
+            TableFactory.updateAdaptiveTableCardSize(ordersCard, displayedCount);
+        }
 
-        ordersListPanel.revalidate();
-        ordersListPanel.repaint();
+        ordersRowsPanel.revalidate();
+        ordersRowsPanel.repaint();
 
-        ordersCard.revalidate();
-        ordersCard.repaint();
-
-        revalidate();
-        repaint();
+        refreshPage();
+        resizeOrdersCard(wrapper);
     }
 
     private boolean mustDisplayOrder(Order order) {
         String status = getOrderStatus(order);
 
         return switch (selectedFilter) {
-            case "En préparation" -> status.equals("Pending") || status.equals("InPreparation");
-            case "Prêtes" -> status.equals("Ready");
-            case "Servies" -> status.equals("Served");
+            case FILTER_PREPARATION -> status.equals("Pending") || status.equals("InPreparation");
+            case FILTER_READY -> status.equals("Ready");
+            case FILTER_SERVED -> status.equals("Served");
             default -> true;
         };
     }
 
     private JPanel createOrderRow(Order order) {
-        JPanel container = new JPanel(new BorderLayout());
-        container.setBackground(Color.WHITE);
-        container.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
-        container.setPreferredSize(new Dimension(850, 72));
-
-        JPanel row = new JPanel(new GridLayout(1, 5, 20, 0));
-        row.setBackground(Color.WHITE);
-        row.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
-
-        JLabel originLabel = createRowLabel(getOrderOrigin(order), AppTheme.TEXT_PRIMARY);
-        JLabel productsLabel = createRowLabel(getProductsSummary(order), AppTheme.TEXT_PRIMARY);
-        JLabel timeLabel = createRowLabel(getOrderTime(order), AppTheme.TEXT_PRIMARY);
-        JLabel statusLabel = createRowLabel(
-                getFrenchStatus(getOrderStatus(order)),
-                getStatusColor(getOrderStatus(order))
+        JButton detailButton = ButtonFactory.createSmallIconButton(
+                "👁",
+                () -> showOrderDetails(order)
         );
 
-        JPanel detailPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        detailPanel.setOpaque(false);
-
-        JButton detailButton = new JButton("👁");
-        detailButton.setPreferredSize(new Dimension(55, 32));
-        detailButton.setFocusPainted(false);
-        detailButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        detailButton.putClientProperty("JButton.buttonType", "roundRect");
-        detailButton.addActionListener(event -> showOrderDetails(order));
-
-        detailPanel.add(detailButton);
-
-        row.add(originLabel);
-        row.add(productsLabel);
-        row.add(timeLabel);
-        row.add(statusLabel);
-        row.add(detailPanel);
-
-        JSeparator separator = new JSeparator();
-        separator.setForeground(new Color(235, 235, 235));
-
-        container.add(row, BorderLayout.CENTER);
-        container.add(separator, BorderLayout.SOUTH);
-
-        return container;
-    }
-
-    private JLabel createRowLabel(String text, Color color) {
-        JLabel label = new JLabel(text);
-
-        label.setFont(AppTheme.BUTTON_FONT);
-        label.setForeground(color);
-        label.setHorizontalAlignment(SwingConstants.LEFT);
-
-        return label;
+        return TableFactory.createDataRow(
+                TableFactory.createCellLabel(
+                        getOrderOrigin(order),
+                        AppTheme.TEXT_PRIMARY
+                ),
+                TableFactory.createCellLabel(
+                        getProductsSummary(order),
+                        AppTheme.TEXT_PRIMARY
+                ),
+                TableFactory.createCellLabel(
+                        DateHelper.formatShortDate(order.getOrderDate()),
+                        AppTheme.TEXT_PRIMARY
+                ),
+                TableFactory.createCellLabel(
+                        getOrderTime(order),
+                        AppTheme.TEXT_PRIMARY
+                ),
+                TableFactory.createCellLabel(
+                        StatusHelper.getFrenchStatus(getOrderStatus(order)),
+                        StatusHelper.getStatusColor(getOrderStatus(order))
+                ),
+                TableFactory.createActionPanel(detailButton)
+        );
     }
 
     private String getOrderOrigin(Order order) {
@@ -369,15 +323,19 @@ public class OrderCardsPanel extends AbstractPanel {
             return "À emporter";
         }
 
+        if (order.getTable() == null) {
+            return "-";
+        }
+
         return "Table " + order.getTable().getIdTable();
     }
 
     private String getOrderTime(Order order) {
-        if (order.getIsTakeAway() && order.getPickUpTime() != null) {
-            return order.getPickUpTime().toString();
+        if (order.getIsTakeAway()) {
+            return DateHelper.formatTime(order.getPickUpTime());
         }
 
-        return "";
+        return "-";
     }
 
     private String getProductsSummary(Order order) {
@@ -389,12 +347,16 @@ public class OrderCardsPanel extends AbstractPanel {
 
         StringBuilder summary = new StringBuilder();
 
-        for (int i = 0; i < lines.size() && i < 2; i++) {
-            if (i > 0) {
+        for (int index = 0; index < lines.size() && index < 2; index++) {
+            if (index > 0) {
                 summary.append(" + ");
             }
 
-            summary.append(lines.get(i).getProduct().getProductLabel());
+            LineOrder line = lines.get(index);
+
+            summary.append(line.getQuantity())
+                    .append("x ")
+                    .append(line.getProduct().getProductLabel());
         }
 
         if (lines.size() > 2) {
@@ -412,21 +374,28 @@ public class OrderCardsPanel extends AbstractPanel {
         }
 
         boolean allServed = true;
-        boolean allReady = true;
+        boolean allReadyOrServed = true;
         boolean hasPreparation = false;
 
         for (LineOrder line : lines) {
+            if (line == null || line.getStatus() == null) {
+                allServed = false;
+                allReadyOrServed = false;
+                hasPreparation = true;
+                continue;
+            }
+
             String status = line.getStatus().getStatusLabel();
 
-            if (!status.equals("Served")) {
+            if (!"Served".equals(status)) {
                 allServed = false;
             }
 
-            if (!status.equals("Ready") && !status.equals("Served")) {
-                allReady = false;
+            if (!"Ready".equals(status) && !"Served".equals(status)) {
+                allReadyOrServed = false;
             }
 
-            if (status.equals("InPreparation") || status.equals("Pending")) {
+            if ("InPreparation".equals(status) || "Pending".equals(status)) {
                 hasPreparation = true;
             }
         }
@@ -435,7 +404,7 @@ public class OrderCardsPanel extends AbstractPanel {
             return "Served";
         }
 
-        if (allReady) {
+        if (allReadyOrServed) {
             return "Ready";
         }
 
@@ -446,30 +415,16 @@ public class OrderCardsPanel extends AbstractPanel {
         return "Pending";
     }
 
-    private String getFrenchStatus(String status) {
-        return switch (status) {
-            case "Ready" -> "Prête";
-            case "Served" -> "Servie";
-            case "InPreparation" -> "En préparation";
-            case "Pending" -> "En attente";
-            default -> status;
-        };
-    }
-
-    private Color getStatusColor(String status) {
-        return switch (status) {
-            case "Ready" -> AppTheme.SUCCESS;
-            case "Served" -> AppTheme.TEXT_SECONDARY;
-            case "InPreparation", "Pending" -> AppTheme.WARNING;
-            default -> AppTheme.TEXT_PRIMARY;
-        };
-    }
-
     private void showOrderDetails(Order order) {
         ArrayList<LineOrder> lines = lineOrdersByOrder.get(order.getIdOrder());
 
         if (lines == null || lines.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Aucun produit dans cette commande.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Aucun produit dans cette commande.",
+                    "Détails de la commande",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
             return;
         }
 
@@ -480,7 +435,7 @@ public class OrderCardsPanel extends AbstractPanel {
                     .append("x ")
                     .append(line.getProduct().getProductLabel())
                     .append(" - ")
-                    .append(getFrenchStatus(line.getStatus().getStatusLabel()))
+                    .append(StatusHelper.getFrenchStatus(line.getStatus().getStatusLabel()))
                     .append("\n");
         }
 
@@ -493,13 +448,22 @@ public class OrderCardsPanel extends AbstractPanel {
     }
 
     private static class OrderCardsData {
-        private ArrayList<Order> orders;
-        private Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder;
+
+        private final ArrayList<Order> orders;
+        private final Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder;
 
         public OrderCardsData(ArrayList<Order> orders,
                               Map<Integer, ArrayList<LineOrder>> lineOrdersByOrder) {
             this.orders = orders;
             this.lineOrdersByOrder = lineOrdersByOrder;
+        }
+
+        public ArrayList<Order> getOrders() {
+            return orders;
+        }
+
+        public Map<Integer, ArrayList<LineOrder>> getLineOrdersByOrder() {
+            return lineOrdersByOrder;
         }
     }
 }

@@ -14,74 +14,87 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class BookingFormPanel extends AppPage {
 
-    private ApplicationController controller;
+    private final ApplicationController controller;
 
-    JComboBox<Integer> dayComboBox;
-    JComboBox<Integer> monthComboBox;
-    JComboBox<Integer> yearComboBox;
+    private JPanel formCard;
+
+    private JComboBox<Integer> dayComboBox;
+    private JComboBox<Integer> monthComboBox;
+    private JComboBox<Integer> yearComboBox;
     private JComboBox<String> hourComboBox;
     private JComboBox<Table> tableComboBox;
     private JTextField customerNameField;
     private JSpinner numberOfPeopleSpinner;
     private JTextField phoneField;
     private JTextArea commentArea;
-    private JComboBox<String> statusComboBox;
+    private JComboBox<StatusOption> statusComboBox;
 
     public BookingFormPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
 
         controller = new ApplicationController();
 
-        addCentered(createPageTitle("New booking"), 0, new Insets(0, 0, 25, 0));
-        addCentered(createFormCard(), 1, new Insets(0, 0, 20, 0));
+        addCentered(
+                createPageTitle("Nouvelle réservation"),
+                0,
+                new Insets(0, 0, 25, 0)
+        );
+
+        addCentered(
+                createFormCardWrapper(),
+                1,
+                new Insets(0, 0, 20, 0)
+        );
 
         loadTables();
     }
 
+    private JPanel createFormCardWrapper() {
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
+
+        formCard = createFormCard();
+        wrapper.add(formCard);
+
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeFormCard(wrapper);
+            }
+        });
+
+        return wrapper;
+    }
+
     private JPanel createFormCard() {
-        JPanel card = CardFactory.createCard(700, 680);
+        JPanel card = CardFactory.createAdaptiveCard(AppTheme.FORM_CARD_MAX_WIDTH, 1000);
         card.setLayout(new BorderLayout());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
-        formPanel.setBorder(BorderFactory.createEmptyBorder(25, 30, 20, 30));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(
+                AppTheme.CARD_PADDING_TOP,
+                AppTheme.CARD_PADDING_LEFT,
+                AppTheme.CARD_PADDING_BOTTOM,
+                AppTheme.CARD_PADDING_RIGHT
+        ));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        dayComboBox = FormFactory.createGenericComboBox();
-        monthComboBox = FormFactory.createGenericComboBox();
-        yearComboBox = FormFactory.createGenericComboBox();
-        fillDateComboBoxes();
-        hourComboBox = createHourComboBox();
-        tableComboBox = FormFactory.createGenericComboBox();
-        customerNameField = FormFactory.createTextField();
-        numberOfPeopleSpinner = FormFactory.createNumberSpinner(1, 20, 2);
-        phoneField = FormFactory.createTextField();
-        commentArea = FormFactory.createTextArea();
-        statusComboBox = FormFactory.createComboBox();
+        createFormFields();
 
-        statusComboBox.addItem("Booked");
-        statusComboBox.addItem("Confirmed");
-        statusComboBox.addItem("Cancelled");
-
-        JScrollPane commentScrollPane = new JScrollPane(commentArea);
-        commentScrollPane.setPreferredSize(new Dimension(FormFactory.FIELD_WIDTH, 130));
-        commentScrollPane.setMinimumSize(new Dimension(FormFactory.FIELD_WIDTH, 130));
-        commentScrollPane.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
-
-        FormFactory.addFormRow(formPanel, gbc, 0, "Date *", createDatePanel());
-        FormFactory.addFormRow(formPanel, gbc, 1, "Hour *", hourComboBox);
-        FormFactory.addFormRow(formPanel, gbc, 2, "Table *", tableComboBox);
-        FormFactory.addFormRow(formPanel, gbc, 3, "Customer name *", customerNameField);
-        FormFactory.addFormRow(formPanel, gbc, 4, "People *", numberOfPeopleSpinner);
-        FormFactory.addFormRow(formPanel, gbc, 5, "Phone", phoneField);
-        FormFactory.addFormRow(formPanel, gbc, 6, "Comment", commentScrollPane);
-        FormFactory.addFormRow(formPanel, gbc, 7, "Status *", statusComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 0, "Date *", createDatePanel());
+        FormFactory.addFormRow(formPanel, constraints, 1, "Heure *", hourComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 2, "Table *", tableComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 3, "Nom du client *", customerNameField);
+        FormFactory.addFormRow(formPanel, constraints, 4, "Personnes *", numberOfPeopleSpinner);
+        FormFactory.addFormRow(formPanel, constraints, 5, "Téléphone", phoneField);
+        FormFactory.addFormRow(formPanel, constraints, 6, "Commentaire", FormFactory.createTextAreaScrollPane(commentArea));
+        FormFactory.addFormRow(formPanel, constraints, 7, "Statut *", statusComboBox);
 
         card.add(formPanel, BorderLayout.CENTER);
         card.add(createButtonPanel(), BorderLayout.SOUTH);
@@ -89,35 +102,33 @@ public class BookingFormPanel extends AppPage {
         return card;
     }
 
-    private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 20));
-        buttonPanel.setOpaque(false);
+    private void createFormFields() {
+        dayComboBox = FormFactory.createGenericComboBox();
+        monthComboBox = FormFactory.createGenericComboBox();
+        yearComboBox = FormFactory.createGenericComboBox();
 
-        JButton cancelButton = ButtonFactory.createSecondaryButton(
-                "Cancel",
-                () -> mainWindow.goBack()
-        );
+        fillDateComboBoxes();
 
-        JButton saveButton = ButtonFactory.createPrimaryButton(
-                "Save booking",
-                this::saveBooking
-        );
+        hourComboBox = createHourComboBox();
 
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(saveButton);
+        tableComboBox = FormFactory.createGenericComboBox();
+        configureTableComboBoxRenderer();
 
-        return buttonPanel;
+        customerNameField = FormFactory.createTextField();
+        numberOfPeopleSpinner = FormFactory.createNumberSpinner(1, 50, 2);
+        phoneField = FormFactory.createTextField();
+        commentArea = FormFactory.createTextArea();
+
+        statusComboBox = FormFactory.createGenericComboBox();
+        fillStatusComboBox();
     }
 
     private JPanel createDatePanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 3, 10, 0));
-        panel.setOpaque(false);
-
-        panel.add(dayComboBox);
-        panel.add(monthComboBox);
-        panel.add(yearComboBox);
-
-        return panel;
+        return FormFactory.createThreeColumnPanel(
+                dayComboBox,
+                monthComboBox,
+                yearComboBox
+        );
     }
 
     private void fillDateComboBoxes() {
@@ -155,6 +166,75 @@ public class BookingFormPanel extends AppPage {
         return comboBox;
     }
 
+    private void fillStatusComboBox() {
+        statusComboBox.addItem(new StatusOption("Reserved", "Réservée"));
+        statusComboBox.addItem(new StatusOption("Pending", "En attente"));
+        statusComboBox.addItem(new StatusOption("Cancelled", "Annulée"));
+    }
+
+    private void configureTableComboBoxRenderer() {
+        tableComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list,
+                                                          Object value,
+                                                          int index,
+                                                          boolean isSelected,
+                                                          boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (value instanceof Table table) {
+                    setText("Table " + table.getIdTable() + " (" + table.getNbSeats() + " places)");
+                }
+
+                return this;
+            }
+        });
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel(new FlowLayout(
+                FlowLayout.RIGHT,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                AppTheme.COMPONENT_GAP_MEDIUM
+        ));
+
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 20));
+
+        JButton cancelButton = ButtonFactory.createSecondaryButton(
+                "Annuler",
+                () -> mainWindow.goBack()
+        );
+
+        JButton saveButton = ButtonFactory.createPrimaryButton(
+                "Enregistrer",
+                this::saveBooking
+        );
+
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(saveButton);
+
+        return buttonPanel;
+    }
+
+    private void resizeFormCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
+
+        int maxWidth = AppTheme.FORM_CARD_MAX_WIDTH;
+        int minWidth = 620;
+        int horizontalMargin = 40;
+
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        formCard.setPreferredSize(new Dimension(newWidth, 690));
+        formCard.setMinimumSize(new Dimension(minWidth, 620));
+        formCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        formCard.revalidate();
+        formCard.repaint();
+    }
+
     private void loadTables() {
         try {
             ArrayList<Table> tables = controller.getAllTables();
@@ -169,7 +249,7 @@ public class BookingFormPanel extends AppPage {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
-                    "Table loading error",
+                    "Erreur de chargement",
                     JOptionPane.ERROR_MESSAGE
             );
         }
@@ -185,8 +265,8 @@ public class BookingFormPanel extends AppPage {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Booking successfully added.",
-                    "Success",
+                    "La réservation a bien été ajoutée.",
+                    "Ajout réussi",
                     JOptionPane.INFORMATION_MESSAGE
             );
 
@@ -196,7 +276,7 @@ public class BookingFormPanel extends AppPage {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
-                    "Booking error",
+                    "Erreur réservation",
                     JOptionPane.ERROR_MESSAGE
             );
 
@@ -204,32 +284,60 @@ public class BookingFormPanel extends AppPage {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
-                    "Validation error",
+                    "Erreur de validation",
                     JOptionPane.WARNING_MESSAGE
             );
         }
     }
 
     private void validateForm() {
-        if (customerNameField.getText().trim().isEmpty()) {
-            throw new IllegalArgumentException("Customer name is required.");
+        getSelectedDate();
+
+        if (hourComboBox.getSelectedItem() == null) {
+            throw new IllegalArgumentException("L'heure est obligatoire.");
         }
 
         if (tableComboBox.getSelectedItem() == null) {
-            throw new IllegalArgumentException("A table must be selected.");
+            throw new IllegalArgumentException("La table est obligatoire.");
         }
 
-        int numberOfPeople = (Integer) numberOfPeopleSpinner.getValue();
+        String customerName = customerNameField.getText().trim();
 
-        if (numberOfPeople <= 0) {
-            throw new IllegalArgumentException("Number of people must be greater than 0.");
+        if (customerName.isEmpty()) {
+            throw new IllegalArgumentException("Le nom du client est obligatoire.");
+        }
+
+        Integer numberOfPeople = (Integer) numberOfPeopleSpinner.getValue();
+
+        if (numberOfPeople == null || numberOfPeople <= 0) {
+            throw new IllegalArgumentException("Le nombre de personnes doit être supérieur à 0.");
         }
 
         Table selectedTable = (Table) tableComboBox.getSelectedItem();
 
         if (selectedTable != null && numberOfPeople > selectedTable.getNbSeats()) {
             throw new IllegalArgumentException(
-                    "Number of people cannot exceed the table capacity."
+                    "Le nombre de personnes dépasse la capacité de la table."
+            );
+        }
+
+        validatePhoneIfPresent();
+
+        if (statusComboBox.getSelectedItem() == null) {
+            throw new IllegalArgumentException("Le statut est obligatoire.");
+        }
+    }
+
+    private void validatePhoneIfPresent() {
+        String phone = phoneField.getText().trim();
+
+        if (phone.isEmpty()) {
+            return;
+        }
+
+        if (!phone.matches("[0-9+ ]{6,20}")) {
+            throw new IllegalArgumentException(
+                    "Le numéro de téléphone doit contenir uniquement des chiffres, des espaces ou le signe +."
             );
         }
     }
@@ -246,7 +354,9 @@ public class BookingFormPanel extends AppPage {
         String phone = getNullableText(phoneField.getText());
         String comment = getNullableText(commentArea.getText());
 
-        Status status = new Status((String) statusComboBox.getSelectedItem());
+        StatusOption selectedStatus = (StatusOption) statusComboBox.getSelectedItem();
+
+        Status status = new Status(selectedStatus.getDatabaseValue());
 
         return new Book(
                 bookDate,
@@ -268,7 +378,7 @@ public class BookingFormPanel extends AppPage {
         try {
             return LocalDate.of(year, month, day);
         } catch (Exception exception) {
-            throw new IllegalArgumentException("The selected date is not valid.");
+            throw new IllegalArgumentException("La date sélectionnée n'est pas valide.");
         }
     }
 
@@ -278,5 +388,25 @@ public class BookingFormPanel extends AppPage {
         }
 
         return text.trim();
+    }
+
+    private static class StatusOption {
+
+        private final String databaseValue;
+        private final String displayValue;
+
+        public StatusOption(String databaseValue, String displayValue) {
+            this.databaseValue = databaseValue;
+            this.displayValue = displayValue;
+        }
+
+        public String getDatabaseValue() {
+            return databaseValue;
+        }
+
+        @Override
+        public String toString() {
+            return displayValue;
+        }
     }
 }

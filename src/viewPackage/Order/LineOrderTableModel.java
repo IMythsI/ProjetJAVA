@@ -1,14 +1,16 @@
 package viewPackage.Order;
 
 import modelPackage.LineOrder;
+import viewPackage.ui.StatusHelper;
 
 import javax.swing.table.AbstractTableModel;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class LineOrderTableModel extends AbstractTableModel {
+
     private final String[] columnNames = {
-            "ID",
+            "N°",
             "Produit",
             "Type",
             "Quantité",
@@ -18,10 +20,10 @@ public class LineOrderTableModel extends AbstractTableModel {
             "Statut"
     };
 
-    private ArrayList<LineOrder> lineOrders;
+    private final ArrayList<LineOrder> lineOrders;
 
     public LineOrderTableModel(ArrayList<LineOrder> lineOrders) {
-        this.lineOrders = lineOrders;
+        this.lineOrders = lineOrders == null ? new ArrayList<>() : lineOrders;
     }
 
     @Override
@@ -41,22 +43,105 @@ public class LineOrderTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        LineOrder line = lineOrders.get(rowIndex);
-
-        BigDecimal total = line.getProduct()
-                .getPrice()
-                .multiply(BigDecimal.valueOf(line.getQuantity()));
+        LineOrder lineOrder = lineOrders.get(rowIndex);
 
         return switch (columnIndex) {
-            case 0 -> line.getIdLineOrder();
-            case 1 -> line.getProduct().getProductLabel();
-            case 2 -> line.getProduct().getProductType().getTypeLabel();
-            case 3 -> line.getQuantity();
-            case 4 -> line.getProduct().getPrice();
-            case 5 -> total;
-            case 6 -> line.getEmployee().getFirstName() + " " + line.getEmployee().getLastName();
-            case 7 -> line.getStatus().getStatusLabel();
-            default -> null;
+            case 0 -> lineOrder.getIdLineOrder();
+            case 1 -> getProductName(lineOrder);
+            case 2 -> getProductType(lineOrder);
+            case 3 -> lineOrder.getQuantity();
+            case 4 -> formatPrice(getUnitPrice(lineOrder));
+            case 5 -> formatPrice(calculateLineTotal(lineOrder));
+            case 6 -> getEmployeeName(lineOrder);
+            case 7 -> getStatusLabel(lineOrder);
+            default -> "-";
         };
+    }
+
+    private String getProductName(LineOrder lineOrder) {
+        if (lineOrder == null || lineOrder.getProduct() == null) {
+            return "-";
+        }
+
+        return lineOrder.getProduct().getProductLabel();
+    }
+
+    private String getProductType(LineOrder lineOrder) {
+        if (
+                lineOrder == null
+                        || lineOrder.getProduct() == null
+                        || lineOrder.getProduct().getProductType() == null
+        ) {
+            return "-";
+        }
+
+        String typeLabel = lineOrder.getProduct()
+                .getProductType()
+                .getTypeLabel();
+
+        return translateProductType(typeLabel);
+    }
+
+    private BigDecimal getUnitPrice(LineOrder lineOrder) {
+        if (lineOrder == null || lineOrder.getProduct() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal price = lineOrder.getProduct().getPrice();
+
+        return price == null ? BigDecimal.ZERO : price;
+    }
+
+    private BigDecimal calculateLineTotal(LineOrder lineOrder) {
+        if (lineOrder == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal unitPrice = getUnitPrice(lineOrder);
+
+        return unitPrice.multiply(BigDecimal.valueOf(lineOrder.getQuantity()));
+    }
+
+    private String getEmployeeName(LineOrder lineOrder) {
+        if (lineOrder == null || lineOrder.getEmployee() == null) {
+            return "-";
+        }
+
+        String firstName = lineOrder.getEmployee().getFirstName();
+        String lastName = lineOrder.getEmployee().getLastName();
+
+        return firstName + " " + lastName;
+    }
+
+    private String getStatusLabel(LineOrder lineOrder) {
+        if (lineOrder == null || lineOrder.getStatus() == null) {
+            return "-";
+        }
+
+        return StatusHelper.getFrenchStatus(
+                lineOrder.getStatus().getStatusLabel()
+        );
+    }
+
+    private String translateProductType(String typeLabel) {
+        if (typeLabel == null) {
+            return "-";
+        }
+
+        return switch (typeLabel) {
+            case "Dish" -> "Plat";
+            case "Drink" -> "Boisson";
+            case "Dessert" -> "Dessert";
+            case "Menu" -> "Menu";
+            default -> typeLabel;
+        };
+    }
+
+    private String formatPrice(BigDecimal price) {
+        if (price == null) {
+            return "0,00 €";
+        }
+
+        return String.format("%.2f €", price).replace(".", ",");
     }
 }
