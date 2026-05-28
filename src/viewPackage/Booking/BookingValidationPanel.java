@@ -14,47 +14,84 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class BookingValidationPanel extends AppPage {
 
-    private ApplicationController controller;
+    private final ApplicationController controller;
 
+    private JPanel validationCard;
     private JComboBox<Table> tableComboBox;
     private JSpinner numberOfPeopleSpinner;
     private JLabel resultLabel;
+    private JButton validateButton;
 
     public BookingValidationPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
 
         controller = new ApplicationController();
 
-        addCentered(createPageTitle("Validate booking capacity"), 0, new Insets(0, 0, 25, 0));
-        addCentered(createValidationCard(), 1, new Insets(0, 0, 20, 0));
+        addCentered(
+                createPageTitle("Validation de réservation"),
+                0,
+                new Insets(0, 0, 12, 0)
+        );
+
+        addCentered(
+                createPageSubtitle("Vérifiez si une table peut accueillir un nombre de personnes"),
+                1,
+                new Insets(0, 0, 30, 0)
+        );
+
+        addCentered(
+                createValidationCardWrapper(),
+                2,
+                new Insets(0, 0, 10, 0)
+        );
 
         loadTables();
     }
 
+    private JPanel createValidationCardWrapper() {
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
+
+        validationCard = createValidationCard();
+        wrapper.add(validationCard);
+
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeValidationCard(wrapper);
+            }
+        });
+
+        return wrapper;
+    }
+
     private JPanel createValidationCard() {
-        JPanel card = CardFactory.createCard(700, 360);
+        JPanel card = CardFactory.createAdaptiveCard(AppTheme.FORM_CARD_MAX_WIDTH, 360);
         card.setLayout(new BorderLayout());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 35, 20, 35));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(
+                AppTheme.CARD_PADDING_TOP,
+                AppTheme.CARD_PADDING_LEFT,
+                AppTheme.CARD_PADDING_BOTTOM,
+                AppTheme.CARD_PADDING_RIGHT
+        ));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
         tableComboBox = FormFactory.createGenericComboBox();
+        configureTableComboBoxRenderer();
+
         numberOfPeopleSpinner = FormFactory.createNumberSpinner(1, 50, 2);
 
-        FormFactory.addFormRow(formPanel, gbc, 0, "Table *", tableComboBox);
-        FormFactory.addFormRow(formPanel, gbc, 1, "People *", numberOfPeopleSpinner);
-
-        resultLabel = new JLabel("Select a table and a number of people.");
-        resultLabel.setFont(AppTheme.SUBTITLE_FONT);
-        resultLabel.setForeground(AppTheme.TEXT_SECONDARY);
-        resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        FormFactory.addFormRow(formPanel, constraints, 0, "Table *", tableComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 1, "Personnes *", numberOfPeopleSpinner);
 
         card.add(formPanel, BorderLayout.CENTER);
         card.add(createBottomPanel(), BorderLayout.SOUTH);
@@ -65,14 +102,29 @@ public class BookingValidationPanel extends AppPage {
     private JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 35, 25, 35));
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(
+                0,
+                AppTheme.CARD_PADDING_LEFT,
+                AppTheme.COMPONENT_GAP_LARGE,
+                AppTheme.CARD_PADDING_RIGHT
+        ));
 
-        JButton validateButton = ButtonFactory.createPrimaryButton(
-                "Validate",
+        resultLabel = new JLabel("Sélectionnez une table et un nombre de personnes.");
+        resultLabel.setFont(AppTheme.TEXT_FONT);
+        resultLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        validateButton = ButtonFactory.createPrimaryButton(
+                "Valider",
                 this::validateCapacity
         );
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(
+                FlowLayout.RIGHT,
+                0,
+                AppTheme.COMPONENT_GAP_MEDIUM
+        ));
+
         buttonPanel.setOpaque(false);
         buttonPanel.add(validateButton);
 
@@ -82,68 +134,159 @@ public class BookingValidationPanel extends AppPage {
         return bottomPanel;
     }
 
+    private void configureTableComboBoxRenderer() {
+        tableComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list,
+                                                          Object value,
+                                                          int index,
+                                                          boolean isSelected,
+                                                          boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (value instanceof Table table) {
+                    setText("Table " + table.getIdTable() + " (" + table.getNbSeats() + " places)");
+                }
+
+                return this;
+            }
+        });
+    }
+
+    private void resizeValidationCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
+
+        int maxWidth = AppTheme.FORM_CARD_MAX_WIDTH;
+        int minWidth = 560;
+        int horizontalMargin = 40;
+
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        validationCard.setPreferredSize(new Dimension(newWidth, 360));
+        validationCard.setMinimumSize(new Dimension(minWidth, 320));
+        validationCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        validationCard.revalidate();
+        validationCard.repaint();
+    }
+
     private void loadTables() {
-        try {
-            ArrayList<Table> tables = controller.getAllTables();
+        tableComboBox.setEnabled(false);
+        validateButton.setEnabled(false);
+        resultLabel.setText("Chargement des tables...");
 
-            tableComboBox.removeAllItems();
-
-            for (Table table : tables) {
-                tableComboBox.addItem(table);
+        SwingWorker<ArrayList<Table>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected ArrayList<Table> doInBackground() throws TableException {
+                return controller.getAllTables();
             }
 
-        } catch (TableException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Table loading error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            @Override
+            protected void done() {
+                try {
+                    ArrayList<Table> tables = get();
+                    fillTableComboBox(tables);
+
+                    tableComboBox.setEnabled(true);
+                    validateButton.setEnabled(true);
+                    resultLabel.setText("Sélectionnez une table et un nombre de personnes.");
+                    resultLabel.setForeground(AppTheme.TEXT_SECONDARY);
+
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    displayTableLoadingError(exception);
+
+                } catch (ExecutionException exception) {
+                    displayTableLoadingError(exception);
+                }
+            }
+        };
+
+        worker.execute();
+    }
+
+    private void fillTableComboBox(ArrayList<Table> tables) {
+        tableComboBox.removeAllItems();
+
+        for (Table table : tables) {
+            tableComboBox.addItem(table);
         }
+    }
+
+    private void displayTableLoadingError(Exception exception) {
+        resultLabel.setText("Impossible de charger les tables.");
+        resultLabel.setForeground(AppTheme.DANGER);
+
+        JOptionPane.showMessageDialog(
+                this,
+                getUsefulErrorMessage(exception),
+                "Erreur de chargement",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private void validateCapacity() {
         try {
-            Table selectedTable = (Table) tableComboBox.getSelectedItem();
-            Integer numberOfPeople = (Integer) numberOfPeopleSpinner.getValue();
+            Book booking = createTemporaryBooking();
 
-            Book temporaryBooking = new Book(
-                    LocalDate.now(),
-                    LocalTime.now(),
-                    selectedTable,
-                    "Temporary customer",
-                    numberOfPeople,
-                    null,
-                    null,
-                    new Status("Reserved")
-            );
+            controller.validateBookingCapacity(booking);
 
-            controller.validateBookingCapacity(temporaryBooking);
+            Table table = booking.getTable();
 
             resultLabel.setText(
-                    "Accepted: this table has enough seats for "
-                            + numberOfPeople
-                            + " people."
+                    "Réservation possible : la table "
+                            + table.getIdTable()
+                            + " possède assez de places."
             );
             resultLabel.setForeground(AppTheme.SUCCESS);
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "The booking capacity is valid.",
-                    "Validation success",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
 
         } catch (BookingException exception) {
             resultLabel.setText(exception.getMessage());
             resultLabel.setForeground(AppTheme.DANGER);
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Validation error",
-                    JOptionPane.WARNING_MESSAGE
-            );
+        } catch (IllegalArgumentException exception) {
+            resultLabel.setText(exception.getMessage());
+            resultLabel.setForeground(AppTheme.WARNING);
         }
+    }
+
+    private Book createTemporaryBooking() {
+        Table selectedTable = (Table) tableComboBox.getSelectedItem();
+
+        if (selectedTable == null) {
+            throw new IllegalArgumentException("La table est obligatoire.");
+        }
+
+        Integer numberOfPeople = (Integer) numberOfPeopleSpinner.getValue();
+
+        if (numberOfPeople == null || numberOfPeople <= 0) {
+            throw new IllegalArgumentException("Le nombre de personnes doit être supérieur à 0.");
+        }
+
+        return new Book(
+                LocalDate.now(),
+                LocalTime.now(),
+                selectedTable,
+                "Client temporaire",
+                numberOfPeople,
+                null,
+                null,
+                new Status("Reserved")
+        );
+    }
+
+    private String getUsefulErrorMessage(Exception exception) {
+        Throwable cause = exception.getCause();
+
+        if (cause != null && cause.getMessage() != null) {
+            return cause.getMessage();
+        }
+
+        if (exception.getMessage() != null) {
+            return exception.getMessage();
+        }
+
+        return "Une erreur inconnue est survenue.";
     }
 }

@@ -5,26 +5,26 @@ import java.awt.*;
 
 public class KitchenAnimationPanel extends JPanel implements Runnable {
 
-    private JLabel animationLabel;
-    private JLabel iconLabel;
+    private static final int ANIMATION_DELAY = 500;
+    private static final int MAX_DOT_COUNT = 3;
+
+    private final JLabel iconLabel;
+    private final JLabel animationLabel;
 
     private Thread animationThread;
-    private boolean running;
-
-    private int step;
+    private volatile boolean running;
+    private int dotCount;
 
     public KitchenAnimationPanel() {
         setOpaque(false);
-        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        setLayout(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_SMALL,
+                AppTheme.COMPONENT_GAP_SMALL
+        ));
 
-        iconLabel = new JLabel("👨‍🍳");
-        iconLabel.setPreferredSize(new Dimension(46, 34));
-        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
-        iconLabel.setForeground(AppTheme.PRIMARY);
-
-        animationLabel = new JLabel("Kitchen is preparing");
-        animationLabel.setFont(AppTheme.SUBTITLE_FONT);
-        animationLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        iconLabel = createIconLabel();
+        animationLabel = createAnimationLabel();
 
         add(iconLabel);
         add(animationLabel);
@@ -32,21 +32,44 @@ public class KitchenAnimationPanel extends JPanel implements Runnable {
         startAnimation();
     }
 
+    private JLabel createIconLabel() {
+        JLabel label = new JLabel("👨‍🍳");
+
+        label.setFont(AppTheme.EMOJI_FONT);
+        label.setForeground(AppTheme.PRIMARY);
+        label.setPreferredSize(AppTheme.SMALL_ICON_BUTTON_SIZE);
+
+        return label;
+    }
+
+    private JLabel createAnimationLabel() {
+        JLabel label = new JLabel("La cuisine se prépare");
+
+        label.setFont(AppTheme.TEXT_FONT);
+        label.setForeground(AppTheme.TEXT_SECONDARY);
+
+        return label;
+    }
+
     private void startAnimation() {
+        if (animationThread != null && animationThread.isAlive()) {
+            return;
+        }
+
         running = true;
 
         animationThread = new Thread(this);
-        animationThread.setName("Kitchen animation thread");
+        animationThread.setName("KitchenAnimationThread");
         animationThread.start();
     }
 
     @Override
     public void run() {
         while (running) {
-            updateAnimation();
+            updateAnimationText();
 
             try {
-                Thread.sleep(500);
+                Thread.sleep(ANIMATION_DELAY);
             } catch (InterruptedException exception) {
                 running = false;
                 Thread.currentThread().interrupt();
@@ -54,11 +77,11 @@ public class KitchenAnimationPanel extends JPanel implements Runnable {
         }
     }
 
-    private void updateAnimation() {
-        step = (step + 1) % 4;
+    private void updateAnimationText() {
+        dotCount = (dotCount + 1) % (MAX_DOT_COUNT + 1);
 
-        String dots = ".".repeat(step);
-        String text = "Kitchen is preparing" + dots;
+        String dots = ".".repeat(dotCount);
+        String text = "La cuisine se prépare" + dots;
 
         SwingUtilities.invokeLater(() -> animationLabel.setText(text));
     }
@@ -74,6 +97,7 @@ public class KitchenAnimationPanel extends JPanel implements Runnable {
 
         if (animationThread != null) {
             animationThread.interrupt();
+            animationThread = null;
         }
     }
 }

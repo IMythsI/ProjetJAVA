@@ -1,138 +1,131 @@
 package viewPackage.Dashboard;
 
 import viewPackage.MainJFrame;
-import viewPackage.ui.AppPage;
-import viewPackage.ui.CardFactory;
-import viewPackage.ui.TableFactory;
-import viewPackage.ui.AppTheme;
+import viewPackage.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class WaiterDashboardPanel extends AppPage {
+
+    private JPanel cardsPanel;
 
     public WaiterDashboardPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
 
         addCentered(
-                createPageTitle("Dashboard Serveur"),
+                createPageTitle("Espace serveur"),
                 0,
-                new Insets(0, 0, 45, 0)
+                new Insets(0, 0, 12, 0)
+        );
+
+        addCentered(
+                createPageSubtitle("Gérez les commandes, les tables et les réservations"),
+                1,
+                new Insets(0, 0, 35, 0)
         );
 
         addCentered(
                 createActionCardsPanel(),
-                1,
-                new Insets(0, 0, 45, 0)
+                2,
+                new Insets(0, 0, 35, 0)
         );
 
-        addCentered(
-                createRecentOrdersPanel(),
-                2,
+        /*addCentered(
+                createInformationCard(),
+                3,
                 new Insets(0, 0, 0, 0)
-        );
+        );*/
     }
 
     private JPanel createActionCardsPanel() {
-        JPanel wrapper = new JPanel(new GridLayout(2, 2, 35, 35));
-
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         wrapper.setOpaque(false);
-        wrapper.setPreferredSize(new Dimension(650, 350));
 
+        cardsPanel = new JPanel(new GridLayout(2, 2, 30, 30));
+        cardsPanel.setOpaque(false);
 
-        wrapper.add(CardFactory.createCardButton(
+        cardsPanel.add(CardFactory.createCardButton(
                 "➕",
                 "Nouvelle commande",
-                "",
+                "Créer une commande à emporter",
                 () -> mainWindow.showTakeAwayOrderFormPanel()
         ));
 
-        wrapper.add(CardFactory.createCardButton(
+        cardsPanel.add(CardFactory.createCardButton(
                 "📅",
                 "Réservations",
-                "",
+                "Lister et gérer les réservations",
                 () -> mainWindow.showBookingListPanel()
         ));
 
-        wrapper.add(CardFactory.createCardButton(
-                "\uD83E\uDE91",
+        cardsPanel.add(CardFactory.createCardButton(
+                "🪑",
                 "Tables",
-                "",
+                "Voir l’état des tables",
                 () -> mainWindow.showTableListPanel()
         ));
 
-        wrapper.add(CardFactory.createCardButton(
+        cardsPanel.add(CardFactory.createCardButton(
                 "🕒",
                 "Commandes en cours",
-                "",
+                "Suivre les commandes ouvertes",
                 () -> mainWindow.showOrderCardsPanel()
         ));
+
+        wrapper.add(cardsPanel);
+
+        wrapper.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+                resizeActionCards(wrapper);
+            }
+        });
 
         return wrapper;
     }
 
-    private JPanel createRecentOrdersPanel() {
-        JPanel card = CardFactory.createCard(520, 170);
+    private void resizeActionCards(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
 
-        JLabel title = new JLabel("Commandes récentes");
-        title.setFont(new Font("Arial", Font.BOLD, 15));
-        title.setForeground(AppTheme.TEXT_PRIMARY);
+        int maxWidth = 900;
+        int minWidth = 620;
+        int horizontalMargin = 40;
 
-        JPanel listPanel = new JPanel(new GridLayout(3, 1, 0, 8));
-        listPanel.setOpaque(false);
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
 
-        listPanel.add(createRecentOrderLine(
-                "Table 4",
-                "Pizza + Coca",
-                "En préparation",
-                AppTheme.WARNING
-        ));
+        int newHeight = newWidth < 760 ? 320 : 350;
 
-        listPanel.add(createRecentOrderLine(
-                "Table 2",
-                "Burger + Frites",
-                "Prête",
-                AppTheme.SUCCESS
-        ));
+        Dimension size = new Dimension(newWidth, newHeight);
 
-        listPanel.add(createRecentOrderLine(
-                "Table 7",
-                "Salade César",
-                "Servie",
-                AppTheme.TEXT_SECONDARY
-        ));
+        cardsPanel.setPreferredSize(size);
+        cardsPanel.setMinimumSize(new Dimension(minWidth, 300));
+        cardsPanel.setMaximumSize(new Dimension(maxWidth, 350));
 
-        card.add(title, BorderLayout.NORTH);
-        card.add(listPanel, BorderLayout.CENTER);
-
-        return card;
+        cardsPanel.revalidate();
+        cardsPanel.repaint();
     }
 
-    private JPanel createRecentOrderLine(
-            String table,
-            String products,
-            String status,
-            Color statusColor
-    ) {
-        JPanel line = new JPanel(new GridLayout(1, 3));
+    private JPanel createInformationCard() {
+        JPanel card = CardFactory.createCard(720, 120);
+        card.setLayout(new BorderLayout());
 
-        line.setOpaque(false);
+        JLabel titleLabel = new JLabel("Actions disponibles");
+        titleLabel.setFont(AppTheme.TEXT_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
 
-        line.add(TableFactory.createCellLabel(
-                table,
-                AppTheme.TEXT_PRIMARY
-        ));
+        JLabel descriptionLabel = new JLabel(
+                "Utilisez les cartes ci-dessus pour accéder rapidement aux fonctionnalités principales du serveur."
+        );
+        descriptionLabel.setFont(AppTheme.TEXT_FONT);
+        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
 
-        line.add(TableFactory.createCellLabel(
-                products,
-                AppTheme.TEXT_PRIMARY
-        ));
+        card.add(titleLabel, BorderLayout.NORTH);
+        card.add(descriptionLabel, BorderLayout.CENTER);
 
-        line.add(TableFactory.createCellLabel(
-                status,
-                statusColor
-        ));
-
-        return line;
+        return card;
     }
 }

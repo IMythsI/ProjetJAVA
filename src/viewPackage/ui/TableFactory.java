@@ -1,49 +1,124 @@
 package viewPackage.ui;
 
-import viewPackage.ui.AppTheme;
-
 import javax.swing.*;
 import java.awt.*;
 
-public class TableFactory {
+public final class TableFactory {
+
+    private TableFactory() {
+        // Utility class
+    }
+
+    /*
+     * ============================================================
+     * CARD
+     * ============================================================
+     */
 
     public static JPanel createTableCard(int width, int minHeight) {
         JPanel card = CardFactory.createAdaptiveCard(width, minHeight);
-        card.setBorder(BorderFactory.createEmptyBorder(18, 25, 18, 25));
+
+        card.setLayout(new BorderLayout());
+        card.setBorder(BorderFactory.createEmptyBorder(
+                AppTheme.CARD_PADDING_TOP,
+                AppTheme.CARD_PADDING_LEFT,
+                AppTheme.CARD_PADDING_BOTTOM,
+                AppTheme.CARD_PADDING_RIGHT
+        ));
+
+        card.setPreferredSize(new Dimension(width, minHeight));
+        card.setMinimumSize(new Dimension(300, minHeight));
+
         return card;
     }
 
-    public static JPanel createHeaderRow(String... columns) {
-        JPanel header = new JPanel(new GridLayout(1, columns.length, 20, 0));
+    /*
+     * ============================================================
+     * HEADER ROW
+     * ============================================================
+     */
 
-        header.setBackground(Color.WHITE);
-        header.setBorder(BorderFactory.createEmptyBorder(10, 25, 12, 25));
-        header.setPreferredSize(new Dimension(800, 45));
-        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+    public static JPanel createHeaderRow(String... columns) {
+        JPanel header = new JPanel(new GridLayout(
+                1,
+                columns.length,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                0
+        ));
+
+        header.setOpaque(false);
+        header.setBorder(BorderFactory.createEmptyBorder(
+                0,
+                AppTheme.TABLE_ROW_HORIZONTAL_PADDING,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                AppTheme.TABLE_ROW_HORIZONTAL_PADDING
+        ));
+
+        header.setPreferredSize(new Dimension(
+                AppTheme.TABLE_CARD_MAX_WIDTH,
+                AppTheme.TABLE_HEADER_HEIGHT
+        ));
+
+        header.setMaximumSize(new Dimension(
+                Integer.MAX_VALUE,
+                AppTheme.TABLE_HEADER_HEIGHT
+        ));
 
         for (String column : columns) {
-            JLabel label = new JLabel(column);
-            label.setFont(AppTheme.BUTTON_FONT);
-            label.setForeground(AppTheme.TEXT_SECONDARY);
-            label.setHorizontalAlignment(SwingConstants.LEFT);
+            JLabel label = createHeaderLabel(column);
             header.add(label);
         }
 
         return header;
     }
 
+    private static JLabel createHeaderLabel(String text) {
+        JLabel label = new JLabel(text);
+
+        label.setFont(AppTheme.TEXT_BOLD_FONT);
+        label.setForeground(AppTheme.TEXT_SECONDARY);
+        label.setHorizontalAlignment(SwingConstants.LEFT);
+
+        return label;
+    }
+
+    /*
+     * ============================================================
+     * DATA ROW
+     * ============================================================
+     */
+
     public static JPanel createDataRow(Component... components) {
         JPanel container = new JPanel(new BorderLayout());
-        container.setBackground(Color.WHITE);
-        container.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
-        container.setPreferredSize(new Dimension(850, 72));
 
-        JPanel row = new JPanel(new GridLayout(1, components.length, 20, 0));
-        row.setBackground(Color.WHITE);
-        row.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        container.setOpaque(false);
+        container.setPreferredSize(new Dimension(
+                AppTheme.TABLE_CARD_MAX_WIDTH,
+                AppTheme.TABLE_ROW_HEIGHT
+        ));
+
+        container.setMaximumSize(new Dimension(
+                Integer.MAX_VALUE,
+                AppTheme.TABLE_ROW_HEIGHT
+        ));
+
+        JPanel row = new JPanel(new GridLayout(
+                1,
+                components.length,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                0
+        ));
+
+        row.setOpaque(false);
+        row.setBorder(BorderFactory.createEmptyBorder(
+                AppTheme.TABLE_ROW_VERTICAL_PADDING,
+                AppTheme.TABLE_ROW_HORIZONTAL_PADDING,
+                AppTheme.TABLE_ROW_VERTICAL_PADDING,
+                AppTheme.TABLE_ROW_HORIZONTAL_PADDING
+        ));
 
         for (Component component : components) {
-            row.add(component);
+            row.add(wrapCell(component));
         }
 
         container.add(row, BorderLayout.CENTER);
@@ -52,18 +127,53 @@ public class TableFactory {
         return container;
     }
 
-    public static JLabel createCellLabel(String text, Color color) {
-        JLabel label = new JLabel(text);
+    private static JPanel wrapCell(Component component) {
+        JPanel wrapper = new JPanel(new BorderLayout());
 
-        label.setFont(AppTheme.BUTTON_FONT);
-        label.setForeground(color);
+        wrapper.setOpaque(false);
+        wrapper.add(component, BorderLayout.CENTER);
+
+        return wrapper;
+    }
+
+    /*
+     * ============================================================
+     * CELL
+     * ============================================================
+     */
+
+    public static JLabel createCellLabel(String text, Color color) {
+        JLabel label = new JLabel(text == null ? "-" : text);
+
+        label.setFont(AppTheme.TEXT_FONT);
+        label.setForeground(color == null ? AppTheme.TEXT_PRIMARY : color);
         label.setHorizontalAlignment(SwingConstants.LEFT);
+        label.setVerticalAlignment(SwingConstants.CENTER);
 
         return label;
     }
 
+    public static JLabel createBoldCellLabel(String text, Color color) {
+        JLabel label = createCellLabel(text, color);
+
+        label.setFont(AppTheme.TEXT_BOLD_FONT);
+
+        return label;
+    }
+
+    /*
+     * ============================================================
+     * ACTIONS
+     * ============================================================
+     */
+
     public static JPanel createActionPanel(JButton... buttons) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        JPanel panel = new JPanel(new FlowLayout(
+                FlowLayout.LEFT,
+                AppTheme.COMPONENT_GAP_SMALL,
+                0
+        ));
+
         panel.setOpaque(false);
 
         for (JButton button : buttons) {
@@ -73,24 +183,47 @@ public class TableFactory {
         return panel;
     }
 
+    /*
+     * ============================================================
+     * SEPARATOR
+     * ============================================================
+     */
+
     public static JSeparator createSeparator() {
         JSeparator separator = new JSeparator();
 
         separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        separator.setForeground(new Color(235, 235, 235));
+        separator.setForeground(AppTheme.SEPARATOR);
+        separator.setBackground(AppTheme.SEPARATOR);
 
         return separator;
     }
 
+    /*
+     * ============================================================
+     * ADAPTIVE SIZE
+     * ============================================================
+     */
+
     public static void updateAdaptiveTableCardSize(JPanel card, int rowCount) {
-        int height = 90 + rowCount * 72;
+        int safeRowCount = Math.max(rowCount, 1);
 
-        if (height < 420) {
-            height = 420;
-        }
+        int height = AppTheme.TABLE_BASE_HEIGHT
+                + safeRowCount * AppTheme.TABLE_ROW_HEIGHT;
 
-        card.setPreferredSize(new Dimension(1050, height));
-        card.setMinimumSize(new Dimension(850, 420));
+        height = Math.max(height, AppTheme.TABLE_MIN_HEIGHT);
+
+        card.setPreferredSize(new Dimension(
+                AppTheme.TABLE_CARD_MAX_WIDTH,
+                height
+        ));
+
+        card.setMinimumSize(new Dimension(
+                300,
+                AppTheme.TABLE_MIN_HEIGHT
+        ));
+
         card.revalidate();
+        card.repaint();
     }
 }

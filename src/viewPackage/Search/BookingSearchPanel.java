@@ -14,39 +14,81 @@ import java.util.ArrayList;
 
 public class BookingSearchPanel extends AppPage {
 
-    private ApplicationController controller;
+    private final ApplicationController controller;
+
+    private JPanel searchCard;
+    private JPanel resultCard;
+    private JPanel resultContentPanel;
 
     private JComboBox<String> customerComboBox;
     private JComboBox<Integer> dayComboBox;
     private JComboBox<Integer> monthComboBox;
     private JComboBox<Integer> yearComboBox;
 
-    private DefaultTableModel tableModel;
-    private JTable resultTable;
-
     public BookingSearchPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
 
         controller = new ApplicationController();
 
-        addCentered(createPageTitle("Search bookings"), 0, new Insets(0, 0, 25, 0));
-        addCentered(createSearchCard(), 1, new Insets(0, 0, 20, 0));
-        addCentered(createResultCard(), 2, new Insets(0, 0, 20, 0));
+        addCentered(
+                createPageTitle("Recherche de réservations"),
+                0,
+                new Insets(0, 0, 12, 0)
+        );
 
-        fillDateComboBoxes();
+        addCentered(
+                createPageSubtitle("Rechercher les réservations d’un client à une date donnée"),
+                1,
+                new Insets(0, 0, 30, 0)
+        );
+
+        addCentered(
+                createSearchCardWrapper(),
+                2,
+                new Insets(0, 0, 25, 0)
+        );
+
+        addCentered(
+                createResultCardWrapper(),
+                3,
+                new Insets(0, 0, 0, 0)
+        );
+
         loadCustomers();
     }
 
+    private JPanel createSearchCardWrapper() {
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
+
+        searchCard = createSearchCard();
+        wrapper.add(searchCard);
+
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeSearchCard(wrapper);
+            }
+        });
+
+        return wrapper;
+    }
+
     private JPanel createSearchCard() {
-        JPanel card = CardFactory.createCard(760, 230);
+        JPanel card = CardFactory.createAdaptiveCard(AppTheme.SEARCH_CARD_MAX_WIDTH, 250);
         card.setLayout(new BorderLayout());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
-        formPanel.setBorder(BorderFactory.createEmptyBorder(25, 30, 15, 30));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(
+                AppTheme.CARD_PADDING_TOP,
+                AppTheme.CARD_PADDING_LEFT,
+                AppTheme.CARD_PADDING_BOTTOM,
+                AppTheme.CARD_PADDING_RIGHT
+        ));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
         customerComboBox = FormFactory.createComboBox();
 
@@ -54,8 +96,10 @@ public class BookingSearchPanel extends AppPage {
         monthComboBox = FormFactory.createGenericComboBox();
         yearComboBox = FormFactory.createGenericComboBox();
 
-        FormFactory.addFormRow(formPanel, gbc, 0, "Customer *", customerComboBox);
-        FormFactory.addFormRow(formPanel, gbc, 1, "Date *", createDatePanel());
+        fillDateComboBoxes();
+
+        FormFactory.addFormRow(formPanel, constraints, 0, "Client *", customerComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 1, "Date *", createDatePanel());
 
         card.add(formPanel, BorderLayout.CENTER);
         card.add(createButtonPanel(), BorderLayout.SOUTH);
@@ -63,12 +107,26 @@ public class BookingSearchPanel extends AppPage {
         return card;
     }
 
+    private JPanel createDatePanel() {
+        return FormFactory.createThreeColumnPanel(
+                dayComboBox,
+                monthComboBox,
+                yearComboBox
+        );
+    }
+
     private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        JPanel buttonPanel = new JPanel(new FlowLayout(
+                FlowLayout.RIGHT,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                AppTheme.COMPONENT_GAP_MEDIUM
+        ));
+
         buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 20));
 
         JButton searchButton = ButtonFactory.createPrimaryButton(
-                "Search",
+                "Rechercher",
                 this::searchBookings
         );
 
@@ -77,48 +135,80 @@ public class BookingSearchPanel extends AppPage {
         return buttonPanel;
     }
 
-    private JPanel createDatePanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 3, 10, 0));
-        panel.setOpaque(false);
+    private JPanel createResultCardWrapper() {
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
 
-        panel.add(dayComboBox);
-        panel.add(monthComboBox);
-        panel.add(yearComboBox);
+        resultCard = createResultCard();
+        wrapper.add(resultCard);
 
-        return panel;
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeResultCard(wrapper);
+            }
+        });
+
+        return wrapper;
     }
 
     private JPanel createResultCard() {
-        JPanel card = CardFactory.createCard(900, 360);
+        JPanel card = CardFactory.createAdaptiveCard(AppTheme.TABLE_CARD_MAX_WIDTH, 380);
         card.setLayout(new BorderLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        String[] columns = {
-                "Date",
-                "Hour",
-                "Customer",
-                "Table",
-                "Seats",
-                "People",
-                "Status"
-        };
+        JLabel titleLabel = new JLabel("Résultats");
+        titleLabel.setFont(AppTheme.TEXT_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        tableModel = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+        resultContentPanel = new JPanel(new BorderLayout());
+        resultContentPanel.setOpaque(false);
 
-        resultTable = new JTable(tableModel);
-        resultTable.setRowHeight(34);
-        resultTable.setFont(AppTheme.SUBTITLE_FONT);
-        resultTable.getTableHeader().setFont(AppTheme.BUTTON_FONT);
+        LoadingHelper.showEmpty(
+                resultContentPanel,
+                "Lancez une recherche pour afficher les résultats."
+        );
 
-        JScrollPane scrollPane = new JScrollPane(resultTable);
-        card.add(scrollPane, BorderLayout.CENTER);
+        card.add(titleLabel, BorderLayout.NORTH);
+        card.add(resultContentPanel, BorderLayout.CENTER);
 
         return card;
+    }
+
+    private void resizeSearchCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
+
+        int maxWidth = AppTheme.SEARCH_CARD_MAX_WIDTH;
+        int minWidth = 620;
+        int horizontalMargin = 40;
+
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        searchCard.setPreferredSize(new Dimension(newWidth, 250));
+        searchCard.setMinimumSize(new Dimension(minWidth, 230));
+        searchCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        searchCard.revalidate();
+        searchCard.repaint();
+    }
+
+    private void resizeResultCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
+
+        int maxWidth = AppTheme.TABLE_CARD_MAX_WIDTH;
+        int minWidth = 760;
+        int horizontalMargin = 40;
+
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        resultCard.setPreferredSize(new Dimension(newWidth, 380));
+        resultCard.setMinimumSize(new Dimension(minWidth, 340));
+        resultCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        resultCard.revalidate();
+        resultCard.repaint();
     }
 
     private void fillDateComboBoxes() {
@@ -142,60 +232,119 @@ public class BookingSearchPanel extends AppPage {
     }
 
     private void loadCustomers() {
-        try {
-            ArrayList<String> customers = controller.getBookingCustomerNames();
+        customerComboBox.setEnabled(false);
+        customerComboBox.removeAllItems();
+        customerComboBox.addItem("Chargement...");
 
-            customerComboBox.removeAllItems();
+        LoadingHelper.runWithLoading(
+                resultContentPanel,
+                "Chargement des clients...",
+                controller::getBookingCustomerNames,
+                this::displayCustomers,
+                this::displayCustomerLoadingError
+        );
+    }
 
-            for (String customer : customers) {
-                customerComboBox.addItem(customer);
-            }
+    private void displayCustomers(ArrayList<String> customers) {
+        customerComboBox.removeAllItems();
 
-        } catch (SearchException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Loading error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        for (String customer : customers) {
+            customerComboBox.addItem(customer);
         }
+
+        customerComboBox.setEnabled(true);
+
+        LoadingHelper.showEmpty(
+                resultContentPanel,
+                "Lancez une recherche pour afficher les résultats."
+        );
+    }
+
+    private void displayCustomerLoadingError(Exception exception) {
+        customerComboBox.removeAllItems();
+        customerComboBox.setEnabled(false);
+
+        LoadingHelper.showError(
+                resultContentPanel,
+                "Impossible de charger les clients."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de chargement",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private void searchBookings() {
         try {
             String customerName = (String) customerComboBox.getSelectedItem();
-            LocalDate date = getSelectedDate();
+            LocalDate selectedDate = getSelectedDate();
 
-            ArrayList<BookingSearchResult> results =
-                    controller.searchBookingsByCustomerAndDate(customerName, date);
+            if (customerName == null || customerName.isBlank() || customerName.equals("Chargement...")) {
+                throw new IllegalArgumentException("Le client est obligatoire.");
+            }
 
-            refreshTable(results);
-
-        } catch (SearchException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Search error",
-                    JOptionPane.ERROR_MESSAGE
+            LoadingHelper.runWithLoading(
+                    resultContentPanel,
+                    "Recherche des réservations...",
+                    () -> controller.searchBookingsByCustomerAndDate(customerName, selectedDate),
+                    this::displayResults,
+                    this::displaySearchError
             );
 
         } catch (IllegalArgumentException exception) {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
-                    "Validation error",
+                    "Erreur de validation",
                     JOptionPane.WARNING_MESSAGE
             );
         }
     }
 
-    private void refreshTable(ArrayList<BookingSearchResult> results) {
-        tableModel.setRowCount(0);
+    private void displayResults(ArrayList<BookingSearchResult> results) {
+        resultContentPanel.removeAll();
+
+        if (results == null || results.isEmpty()) {
+            LoadingHelper.showEmpty(
+                    resultContentPanel,
+                    "Aucune réservation trouvée pour ces critères."
+            );
+            return;
+        }
+
+        JTable table = createResultTable(results);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        resultContentPanel.add(scrollPane, BorderLayout.CENTER);
+        resultContentPanel.revalidate();
+        resultContentPanel.repaint();
+    }
+
+    private JTable createResultTable(ArrayList<BookingSearchResult> results) {
+        String[] columns = {
+                "Date",
+                "Heure",
+                "Client",
+                "Table",
+                "Places",
+                "Personnes",
+                "Statut"
+        };
+
+        DefaultTableModel tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
         for (BookingSearchResult result : results) {
             tableModel.addRow(new Object[]{
-                    result.getBookDate(),
-                    result.getBookHour(),
+                    DateHelper.formatShortDate(result.getBookDate()),
+                    DateHelper.formatTime(result.getBookHour()),
                     result.getCustomerName(),
                     "Table " + result.getTableId(),
                     result.getNbSeats(),
@@ -204,14 +353,28 @@ public class BookingSearchPanel extends AppPage {
             });
         }
 
-        if (results.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No booking found for these criteria.",
-                    "No result",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-        }
+        JTable table = new JTable(tableModel);
+
+        table.setRowHeight(AppTheme.JTABLE_ROW_HEIGHT);
+        table.setFont(AppTheme.TEXT_FONT);
+        table.getTableHeader().setFont(AppTheme.TEXT_BOLD_FONT);
+        table.getTableHeader().setPreferredSize(new Dimension(0, AppTheme.TABLE_HEADER_HEIGHT));
+
+        return table;
+    }
+
+    private void displaySearchError(Exception exception) {
+        LoadingHelper.showError(
+                resultContentPanel,
+                "Impossible d’effectuer la recherche."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de recherche",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private LocalDate getSelectedDate() {
@@ -222,7 +385,7 @@ public class BookingSearchPanel extends AppPage {
         try {
             return LocalDate.of(year, month, day);
         } catch (Exception exception) {
-            throw new IllegalArgumentException("The selected date is not valid.");
+            throw new IllegalArgumentException("La date sélectionnée n'est pas valide.");
         }
     }
 }

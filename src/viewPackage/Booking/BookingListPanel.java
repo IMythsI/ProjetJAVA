@@ -4,7 +4,6 @@ import controllerPackage.ApplicationController;
 import exceptionPackage.BookingException;
 import modelPackage.Book;
 import viewPackage.MainJFrame;
-import viewPackage.ui.AppTheme;
 import viewPackage.ui.*;
 
 import javax.swing.*;
@@ -13,12 +12,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class BookingListPanel extends AppPage {
-    private ApplicationController controller;
+
+    private final ApplicationController controller;
 
     private LocalDate selectedDate;
     private JLabel dateLabel;
     private JPanel bookingRowsPanel;
     private JPanel bookingCard;
+    private JPanel wrapper;
 
     public BookingListPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
@@ -26,61 +27,108 @@ public class BookingListPanel extends AppPage {
         controller = new ApplicationController();
         selectedDate = LocalDate.now();
 
-        addCentered(createPageTitle("Réservations"), 0, new Insets(0, 0, 30, 0));
-        addCentered(createDatePanel(), 1, new Insets(0, 0, 35, 0));
-        addCentered(createBookingCard(), 2, new Insets(0, 0, 0, 0));
+        addCentered(
+                createPageTitle("Réservations"),
+                0,
+                new Insets(0, 0, 25, 0)
+        );
+
+        addCentered(
+                createDatePanel(),
+                1,
+                new Insets(0, 0, 30, 0)
+        );
+
+        addCentered(
+                createBookingCardWrapper(),
+                2,
+                new Insets(0, 0, 0, 0)
+        );
 
         loadBookings();
     }
 
     private JPanel createDatePanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setOpaque(false);
-        panel.setPreferredSize(new Dimension(900, 80));
+        JPanel wrapper = new JPanel(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                0
+        ));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 10, 0, 10);
+        wrapper.setOpaque(false);
 
-        JButton previousButton = ButtonFactory.createSecondaryButton("‹", this::previousDay);
-        JButton nextButton = ButtonFactory.createSecondaryButton("›", this::nextDay);
+        JButton previousButton = ButtonFactory.createSecondaryButton(
+                "‹",
+                this::previousDay
+        );
+
+        JButton nextButton = ButtonFactory.createSecondaryButton(
+                "›",
+                this::nextDay
+        );
+
         JButton newBookingButton = ButtonFactory.createPrimaryButton(
                 "+ Nouvelle réservation",
                 () -> mainWindow.showBookingFormPanel()
         );
 
-        previousButton.setPreferredSize(new Dimension(45, 42));
-        nextButton.setPreferredSize(new Dimension(45, 42));
-        newBookingButton.setPreferredSize(new Dimension(210, 48));
+        previousButton.setPreferredSize(new Dimension(52, AppTheme.BUTTON_HEIGHT));
+        nextButton.setPreferredSize(new Dimension(52, AppTheme.BUTTON_HEIGHT));
+        newBookingButton.setPreferredSize(new Dimension(230, AppTheme.BUTTON_HEIGHT));
 
-        dateLabel = new JLabel(DateHelper.formatDate(selectedDate), SwingConstants.CENTER);
-        dateLabel.setPreferredSize(new Dimension(260, 48));
-        dateLabel.setFont(AppTheme.BUTTON_FONT);
-        dateLabel.setOpaque(true);
-        dateLabel.setBackground(Color.WHITE);
-        dateLabel.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        dateLabel.putClientProperty("FlatLaf.style", "arc:18");
+        dateLabel = createDateLabel();
 
-        gbc.gridx = 0;
-        panel.add(previousButton, gbc);
+        wrapper.add(previousButton);
+        wrapper.add(dateLabel);
+        wrapper.add(nextButton);
+        wrapper.add(Box.createHorizontalStrut(AppTheme.COMPONENT_GAP_LARGE));
+        wrapper.add(newBookingButton);
 
-        gbc.gridx = 1;
-        panel.add(dateLabel, gbc);
+        return wrapper;
+    }
 
-        gbc.gridx = 2;
-        panel.add(nextButton, gbc);
+    private JLabel createDateLabel() {
+        JLabel label = new JLabel(DateHelper.formatDate(selectedDate), SwingConstants.CENTER);
 
-        gbc.gridx = 3;
-        gbc.insets = new Insets(0, 60, 0, 10);
-        panel.add(newBookingButton, gbc);
+        label.setPreferredSize(new Dimension(280, AppTheme.BUTTON_HEIGHT));
+        label.setMinimumSize(new Dimension(220, AppTheme.BUTTON_HEIGHT));
+        label.setFont(AppTheme.TEXT_BOLD_FONT);
+        label.setForeground(AppTheme.TEXT_PRIMARY);
+        label.setOpaque(true);
+        label.setBackground(Color.WHITE);
+        label.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(AppTheme.BORDER),
+                BorderFactory.createEmptyBorder(8, 18, 8, 18)
+        ));
 
-        return panel;
+        return label;
+    }
+
+    private JPanel createBookingCardWrapper() {
+        wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setOpaque(false);
+
+        bookingCard = createBookingCard();
+
+        wrapper.add(bookingCard);
+
+        wrapper.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent event) {
+                resizeBookingCard(wrapper);
+            }
+        });
+
+        return wrapper;
     }
 
     private JPanel createBookingCard() {
-        bookingCard = TableFactory.createTableCard(850, 430);
+        JPanel card = TableFactory.createTableCard(
+                AppTheme.TABLE_CARD_MAX_WIDTH,
+                AppTheme.TABLE_MIN_HEIGHT
+        );
 
-        bookingCard.add(
+        card.add(
                 TableFactory.createHeaderRow(
                         "Heure",
                         "Client",
@@ -93,48 +141,86 @@ public class BookingListPanel extends AppPage {
         );
 
         bookingRowsPanel = new JPanel();
-        bookingRowsPanel.setBackground(Color.WHITE);
+        bookingRowsPanel.setOpaque(false);
         bookingRowsPanel.setLayout(new BoxLayout(bookingRowsPanel, BoxLayout.Y_AXIS));
 
-        bookingCard.add(bookingRowsPanel, BorderLayout.CENTER);
+        card.add(bookingRowsPanel, BorderLayout.CENTER);
 
-        return bookingCard;
+        return card;
+    }
+
+    private void resizeBookingCard(JPanel wrapper) {
+        int availableWidth = wrapper.getWidth();
+
+        int maxWidth = AppTheme.TABLE_CARD_MAX_WIDTH;
+        int minWidth = 760;
+        int horizontalMargin = 40;
+
+        int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
+        newWidth = Math.max(minWidth, newWidth);
+
+        int currentHeight = bookingCard.getPreferredSize().height;
+
+        bookingCard.setPreferredSize(new Dimension(newWidth, currentHeight));
+        bookingCard.setMinimumSize(new Dimension(minWidth, AppTheme.TABLE_MIN_HEIGHT));
+        bookingCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
+
+        bookingCard.revalidate();
+        bookingCard.repaint();
     }
 
     private void loadBookings() {
+        LoadingHelper.runWithLoading(
+                bookingRowsPanel,
+                "Chargement des réservations...",
+                () -> controller.getBookingsByDate(selectedDate),
+                this::displayBookings,
+                this::displayLoadingError
+        );
+    }
+
+    private void displayBookings(ArrayList<Book> bookings) {
         bookingRowsPanel.removeAll();
 
-        try {
-            ArrayList<Book> bookings = controller.getBookingsByDate(selectedDate);
-
-            if (bookings.isEmpty()) {
-                LoadingHelper.showEmpty(
-                        bookingRowsPanel,
-                        "Aucune réservation pour cette date."
-                );
-            } else {
-                for (Book booking : bookings) {
-                    bookingRowsPanel.add(createBookingRow(booking));
-                }
-            }
-
-            TableFactory.updateAdaptiveTableCardSize(
-                    bookingCard,
-                    bookings.size()
+        if (bookings == null || bookings.isEmpty()) {
+            LoadingHelper.showEmpty(
+                    bookingRowsPanel,
+                    "Aucune réservation pour cette date."
             );
 
-        } catch (BookingException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            TableFactory.updateAdaptiveTableCardSize(bookingCard, 1);
+            refreshPage();
+            return;
         }
+
+        for (Book booking : bookings) {
+            bookingRowsPanel.add(createBookingRow(booking));
+        }
+
+        TableFactory.updateAdaptiveTableCardSize(
+                bookingCard,
+                bookings.size()
+        );
 
         bookingRowsPanel.revalidate();
         bookingRowsPanel.repaint();
+
         refreshPage();
+        resizeBookingCard(wrapper);
+    }
+
+    private void displayLoadingError(Exception exception) {
+        LoadingHelper.showError(
+                bookingRowsPanel,
+                "Impossible de charger les réservations."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de chargement",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     private JPanel createBookingRow(Book booking) {
@@ -166,12 +252,8 @@ public class BookingListPanel extends AppPage {
                         AppTheme.TEXT_PRIMARY
                 ),
                 TableFactory.createCellLabel(
-                        StatusHelper.getFrenchStatus(
-                                booking.getStatus().getStatusLabel()
-                        ),
-                        StatusHelper.getStatusColor(
-                                booking.getStatus().getStatusLabel()
-                        )
+                        StatusHelper.getFrenchStatus(booking.getStatus().getStatusLabel()),
+                        StatusHelper.getStatusColor(booking.getStatus().getStatusLabel())
                 ),
                 TableFactory.createActionPanel(editButton, deleteButton)
         );
@@ -212,25 +294,44 @@ public class BookingListPanel extends AppPage {
             return;
         }
 
-        try {
-            controller.deleteBooking(booking);
+        deleteBooking(booking);
+    }
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "La réservation a bien été supprimée.",
-                    "Suppression réussie",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+    private void deleteBooking(Book booking) {
+        LoadingHelper.runWithLoading(
+                bookingRowsPanel,
+                "Suppression de la réservation...",
+                () -> {
+                    controller.deleteBooking(booking);
+                    return null;
+                },
+                ignored -> {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "La réservation a bien été supprimée.",
+                            "Suppression réussie",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
 
-            loadBookings();
+                    loadBookings();
+                },
+                this::displayDeleteError
+        );
+    }
 
-        } catch (BookingException exception) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    exception.getMessage(),
-                    "Erreur de suppression",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+    private void displayDeleteError(Exception exception) {
+        LoadingHelper.showError(
+                bookingRowsPanel,
+                "Impossible de supprimer la réservation."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de suppression",
+                JOptionPane.ERROR_MESSAGE
+        );
+
+        loadBookings();
     }
 }
