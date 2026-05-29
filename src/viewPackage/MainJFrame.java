@@ -4,7 +4,10 @@ import modelPackage.Book;
 import modelPackage.Order;
 import modelPackage.Table;
 import modelPackage.Product;
-
+import modelPackage.Product;
+import viewPackage.Product.ProductManagementPanel;
+import viewPackage.Product.ProductFormPanel;
+import viewPackage.Product.ProductEditPanel;
 import viewPackage.Booking.BookingEditPanel;
 import viewPackage.Booking.BookingFormPanel;
 import viewPackage.Booking.BookingListPanel;
@@ -24,6 +27,9 @@ import viewPackage.Table.TableDetailPanel;
 import viewPackage.Table.TableListPanel;
 import viewPackage.ui.AppTheme;
 
+import viewPackage.Dashboard.BarmanDashboardPanel;
+import viewPackage.Dashboard.CookDashboardPanel;
+import viewPackage.Dashboard.ManagerDashboardPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -362,5 +368,31 @@ public class MainJFrame extends JFrame {
 
     public void showMenuPanel() {
         showProductSearchPanel();
+    }
+
+    public void showProductManagementPanel() {
+        changePanel(new ProductManagementPanel(this));
+    }
+
+    public void showProductFormPanel() {
+        changePanel(new ProductFormPanel(this));
+    }
+
+    public void showProductEditPanel(Product product) {
+        changePanel(new ProductEditPanel(this, product));
+    }
+    public void showBarmanPanel() {
+        changePanel(new BarmanDashboardPanel(this));
+    }
+
+    public void showManagerPanel() {
+        changePanel(new ManagerDashboardPanel(this));
+    }
+
+    public void showCookPanel() {
+        changePanel(new CookDashboardPanel(this));
+    }
+    public void showOrderDetailPanel(Order order) {
+        changePanel(new OrderDetailPanel(this, order));
     }
 }
