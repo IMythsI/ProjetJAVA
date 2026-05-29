@@ -36,4 +36,27 @@ public class LineOrderManager {
             throw new LineOrderException(message);
         }
     }
+
+    public void updateLineOrderStatus(Integer idLineOrder, String statusLabel) throws LineOrderException {
+        if (idLineOrder == null || idLineOrder <= 0) {
+            throw new LineOrderException("La ligne de commande sélectionnée est invalide.");
+        }
+
+        if (statusLabel == null || statusLabel.isBlank()) {
+            throw new LineOrderException("Le statut est obligatoire.");
+        }
+
+        if (!isAllowedLineOrderStatus(statusLabel)) {
+            throw new LineOrderException("Le statut sélectionné n'est pas valide.");
+        }
+
+        lineOrderDAO.updateLineOrderStatus(idLineOrder, statusLabel);
+    }
+
+    private boolean isAllowedLineOrderStatus(String statusLabel) {
+        return switch (statusLabel) {
+            case "Pending", "InPreparation", "Ready", "Served" -> true;
+            default -> false;
+        };
+    }
 }

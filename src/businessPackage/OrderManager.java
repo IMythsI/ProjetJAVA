@@ -125,4 +125,10 @@ public class OrderManager {
             throw new OrderException(message);
         }
     }
+
+    public void deleteOrder(Integer idOrder) throws OrderException {
+        validateId(idOrder, "La commande sélectionnée est invalide.");
+
+        orderDAO.deleteOrder(idOrder);
+    }
 }

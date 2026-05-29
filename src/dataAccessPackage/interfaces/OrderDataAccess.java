@@ -18,4 +18,6 @@ public interface OrderDataAccess {
 
     void addOrderWithLines(Order order, Map<Product, Integer> cart)
             throws OrderException;
+
+    void deleteOrder(Integer idOrder) throws OrderException;
 }

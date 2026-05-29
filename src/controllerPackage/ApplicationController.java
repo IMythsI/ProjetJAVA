@@ -102,6 +102,10 @@ public class ApplicationController {
         orderManager.validateOrder(order, cart);
     }
 
+    public void deleteOrder(Integer idOrder) throws OrderException {
+        orderManager.deleteOrder(idOrder);
+    }
+
     //LINE ORDER
     public ArrayList<LineOrder> getLineOrdersByTable(Integer idTable)
             throws LineOrderException {
@@ -113,6 +117,10 @@ public class ApplicationController {
             throws LineOrderException {
 
         return lineOrderManager.getLineOrdersByOrder(idOrder);
+    }
+
+    public void updateLineOrderStatus(Integer idLineOrder, String statusLabel) throws LineOrderException {
+        lineOrderManager.updateLineOrderStatus(idLineOrder, statusLabel);
     }
 
     //SEARCH
