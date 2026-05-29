@@ -190,6 +190,7 @@ public class BookingListPanel extends AppPage {
 
             TableFactory.updateAdaptiveTableCardSize(bookingCard, 1);
             refreshPage();
+            resizeBookingCard(wrapper);
             return;
         }
 

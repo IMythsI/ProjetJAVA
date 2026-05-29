@@ -15,7 +15,6 @@ public class TakeAwayOrderFormPanel extends AppPage {
 
     private JTextField customerNameField;
     private JTextField phoneField;
-    private JSpinner guestCountSpinner;
     private JComboBox<String> pickUpTimeComboBox;
     private JTextArea commentArea;
 
@@ -59,7 +58,7 @@ public class TakeAwayOrderFormPanel extends AppPage {
     }
 
     private JPanel createFormCard() {
-        JPanel card = CardFactory.createAdaptiveCard(AppTheme.FORM_CARD_MAX_WIDTH, 540);
+        JPanel card = CardFactory.createAdaptiveCard(AppTheme.FORM_CARD_MAX_WIDTH, 480);
         card.setLayout(new BorderLayout());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -78,9 +77,8 @@ public class TakeAwayOrderFormPanel extends AppPage {
 
         FormFactory.addFormRow(formPanel, constraints, 0, "Nom du client *", customerNameField);
         FormFactory.addFormRow(formPanel, constraints, 1, "Téléphone", phoneField);
-        FormFactory.addFormRow(formPanel, constraints, 2, "Personnes *", guestCountSpinner);
-        FormFactory.addFormRow(formPanel, constraints, 3, "Heure de retrait *", pickUpTimeComboBox);
-        FormFactory.addFormRow(formPanel, constraints, 4, "Commentaire", FormFactory.createTextAreaScrollPane(commentArea));
+        FormFactory.addFormRow(formPanel, constraints, 2, "Heure de retrait *", pickUpTimeComboBox);
+        FormFactory.addFormRow(formPanel, constraints, 3, "Commentaire", FormFactory.createTextAreaScrollPane(commentArea));
 
         card.add(formPanel, BorderLayout.CENTER);
         card.add(createButtonPanel(), BorderLayout.SOUTH);
@@ -91,7 +89,6 @@ public class TakeAwayOrderFormPanel extends AppPage {
     private void createFormFields() {
         customerNameField = FormFactory.createTextField();
         phoneField = FormFactory.createTextField();
-        guestCountSpinner = FormFactory.createNumberSpinner(1, 50, 1);
         pickUpTimeComboBox = createPickUpTimeComboBox();
         commentArea = FormFactory.createTextArea();
     }
@@ -169,8 +166,8 @@ public class TakeAwayOrderFormPanel extends AppPage {
         int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
         newWidth = Math.max(minWidth, newWidth);
 
-        formCard.setPreferredSize(new Dimension(newWidth, 540));
-        formCard.setMinimumSize(new Dimension(minWidth, 500));
+        formCard.setPreferredSize(new Dimension(newWidth, 480));
+        formCard.setMinimumSize(new Dimension(minWidth, 440));
         formCard.setMaximumSize(new Dimension(maxWidth, Integer.MAX_VALUE));
 
         formCard.revalidate();
@@ -202,12 +199,6 @@ public class TakeAwayOrderFormPanel extends AppPage {
             throw new IllegalArgumentException("Le nom du client est obligatoire.");
         }
 
-        Integer guestCount = (Integer) guestCountSpinner.getValue();
-
-        if (guestCount == null || guestCount <= 0) {
-            throw new IllegalArgumentException("Le nombre de personnes doit être supérieur à 0.");
-        }
-
         if (pickUpTimeComboBox.getSelectedItem() == null) {
             throw new IllegalArgumentException("L'heure de retrait est obligatoire.");
         }
@@ -234,7 +225,7 @@ public class TakeAwayOrderFormPanel extends AppPage {
         String phone = getNullableText(phoneField.getText());
         String comment = getNullableText(commentArea.getText());
 
-        Integer guestCount = (Integer) guestCountSpinner.getValue();
+        Integer guestCount = 1;
         LocalTime pickUpTime = LocalTime.parse((String) pickUpTimeComboBox.getSelectedItem());
 
         return new Order(
