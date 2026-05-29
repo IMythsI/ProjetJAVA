@@ -1,6 +1,7 @@
 package exceptionPackage;
 
 public class LineOrderException extends Exception {
+
     public LineOrderException(String message) {
         super(message);
     }

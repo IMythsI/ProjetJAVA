@@ -8,7 +8,14 @@ import modelPackage.Book;
 import modelPackage.Status;
 import modelPackage.Table;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Time;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -26,28 +33,32 @@ public class BookingDBAccess implements BookingDataAccess {
                        b.nbPerson,
                        b.comment,
                        b.telCustomer,
-                       b.statusLabel,
-                       t.nbSeats
+                       b.statusLabel AS bookStatusLabel,
+                       t.nbSeats,
+                       t.statusLabel AS tableStatusLabel
                 FROM Book b
                 INNER JOIN RestaurantTable t
                         ON b.idTable = t.idTable
                 ORDER BY b.bookDate, b.bookHour
                 """;
 
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()
-        ) {
-            while (resultSet.next()) {
-                bookings.add(createBookFromResultSet(resultSet));
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (
+                    PreparedStatement statement = connection.prepareStatement(sql);
+                    ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    bookings.add(createBookFromResultSet(resultSet));
+                }
             }
 
             return bookings;
 
         } catch (SQLException | ConnectionException exception) {
             throw new BookingException(
-                    "Erreur lors du chargement de toutes les réservations.",
+                    "Erreur lors du chargement des réservations.",
                     exception
             );
         }
@@ -65,8 +76,9 @@ public class BookingDBAccess implements BookingDataAccess {
                        b.nbPerson,
                        b.comment,
                        b.telCustomer,
-                       b.statusLabel,
-                       t.nbSeats
+                       b.statusLabel AS bookStatusLabel,
+                       t.nbSeats,
+                       t.statusLabel AS tableStatusLabel
                 FROM Book b
                 INNER JOIN RestaurantTable t
                         ON b.idTable = t.idTable
@@ -74,15 +86,16 @@ public class BookingDBAccess implements BookingDataAccess {
                 ORDER BY b.bookHour
                 """;
 
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setDate(1, Date.valueOf(date));
+        try {
+            Connection connection = SingletonConnection.getInstance();
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    bookings.add(createBookFromResultSet(resultSet));
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setDate(1, Date.valueOf(date));
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        bookings.add(createBookFromResultSet(resultSet));
+                    }
                 }
             }
 
@@ -90,7 +103,7 @@ public class BookingDBAccess implements BookingDataAccess {
 
         } catch (SQLException | ConnectionException exception) {
             throw new BookingException(
-                    "Erreur lors du chargement des réservations.",
+                    "Erreur lors du chargement des réservations de la date sélectionnée.",
                     exception
             );
         }
@@ -99,18 +112,32 @@ public class BookingDBAccess implements BookingDataAccess {
     @Override
     public void addBooking(Book booking) throws BookingException {
         String sql = """
-                INSERT INTO Book
-                    (bookDate, bookHour, idTable, nameCustomer, nbPerson, comment, telCustomer, statusLabel)
-                VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Book (
+                    bookDate,
+                    bookHour,
+                    idTable,
+                    nameCustomer,
+                    nbPerson,
+                    comment,
+                    telCustomer,
+                    statusLabel
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            fillBookingValues(statement, booking, 1);
-            statement.executeUpdate();
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                fillBookingValues(statement, booking, 1);
+                statement.executeUpdate();
+            }
+
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            throw new BookingException(
+                    "Impossible d’ajouter la réservation : cette table est peut-être déjà réservée à cette date et cette heure.",
+                    exception
+            );
 
         } catch (SQLException | ConnectionException exception) {
             throw new BookingException(
@@ -123,59 +150,44 @@ public class BookingDBAccess implements BookingDataAccess {
     @Override
     public void updateBooking(Book oldBooking, Book newBooking) throws BookingException {
         String sql = """
-            UPDATE Book
-            SET bookDate = ?,
-                bookHour = ?,
-                idTable = ?,
-                nameCustomer = ?,
-                nbPerson = ?,
-                comment = ?,
-                telCustomer = ?,
-                statusLabel = ?
-            WHERE bookDate = ?
-              AND bookHour = ?
-              AND idTable = ?
-              AND nameCustomer = ?
-            """;
+                UPDATE Book
+                SET bookDate = ?,
+                    bookHour = ?,
+                    idTable = ?,
+                    nameCustomer = ?,
+                    nbPerson = ?,
+                    comment = ?,
+                    telCustomer = ?,
+                    statusLabel = ?
+                WHERE bookDate = ?
+                  AND bookHour = ?
+                  AND idTable = ?
+                  AND nameCustomer = ?
+                """;
 
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setDate(1, Date.valueOf(newBooking.getBookDate()));
-            statement.setTime(2, Time.valueOf(newBooking.getBookHour()));
-            statement.setInt(3, newBooking.getTable().getIdTable());
-            statement.setString(4, newBooking.getNameCustomer());
-            statement.setInt(5, newBooking.getNbPerson());
+        try {
+            Connection connection = SingletonConnection.getInstance();
 
-            if (newBooking.getComment() == null || newBooking.getComment().isBlank()) {
-                statement.setNull(6, Types.VARCHAR);
-            } else {
-                statement.setString(6, newBooking.getComment());
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                fillBookingValues(statement, newBooking, 1);
+                fillBookingPrimaryKey(statement, oldBooking, 9);
+
+                int updatedRows = statement.executeUpdate();
+
+                if (updatedRows == 0) {
+                    throw new BookingException("Aucune réservation n'a été modifiée.");
+                }
             }
 
-            if (newBooking.getTelCustomer() == null || newBooking.getTelCustomer().isBlank()) {
-                statement.setNull(7, Types.VARCHAR);
-            } else {
-                statement.setString(7, newBooking.getTelCustomer());
-            }
-
-            statement.setString(8, newBooking.getStatus().getStatusLabel());
-
-            statement.setDate(9, Date.valueOf(oldBooking.getBookDate()));
-            statement.setTime(10, Time.valueOf(oldBooking.getBookHour()));
-            statement.setInt(11, oldBooking.getTable().getIdTable());
-            statement.setString(12, oldBooking.getNameCustomer());
-
-            int updatedRows = statement.executeUpdate();
-
-            if (updatedRows == 0) {
-                throw new BookingException("No booking has been updated.");
-            }
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            throw new BookingException(
+                    "Impossible de modifier la réservation : cette table est peut-être déjà réservée à cette date et cette heure.",
+                    exception
+            );
 
         } catch (SQLException | ConnectionException exception) {
             throw new BookingException(
-                    "Error while updating the booking.",
+                    "Erreur lors de la modification de la réservation.",
                     exception
             );
         }
@@ -191,24 +203,104 @@ public class BookingDBAccess implements BookingDataAccess {
                   AND nameCustomer = ?
                 """;
 
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setDate(1, Date.valueOf(booking.getBookDate()));
-            statement.setTime(2, Time.valueOf(booking.getBookHour()));
-            statement.setInt(3, booking.getTable().getIdTable());
-            statement.setString(4, booking.getNameCustomer());
+        try {
+            Connection connection = SingletonConnection.getInstance();
 
-            int deletedRows = statement.executeUpdate();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                fillBookingPrimaryKey(statement, booking, 1);
 
-            if (deletedRows == 0) {
-                throw new BookingException("Aucune réservation n'a été supprimée.");
+                int deletedRows = statement.executeUpdate();
+
+                if (deletedRows == 0) {
+                    throw new BookingException("Aucune réservation n'a été supprimée.");
+                }
             }
 
         } catch (SQLException | ConnectionException exception) {
             throw new BookingException(
                     "Erreur lors de la suppression de la réservation.",
+                    exception
+            );
+        }
+    }
+
+    @Override
+    public boolean isTableAlreadyBooked(Book booking) throws BookingException {
+        String sql = """
+                SELECT COUNT(*) AS bookingCount
+                FROM Book
+                WHERE bookDate = ?
+                  AND bookHour = ?
+                  AND idTable = ?
+                  AND statusLabel <> 'Cancelled'
+                """;
+
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setDate(1, Date.valueOf(booking.getBookDate()));
+                statement.setTime(2, Time.valueOf(booking.getBookHour()));
+                statement.setInt(3, booking.getTable().getIdTable());
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("bookingCount") > 0;
+                    }
+                }
+            }
+
+            return false;
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new BookingException(
+                    "Erreur lors de la vérification de disponibilité de la table.",
+                    exception
+            );
+        }
+    }
+
+    @Override
+    public boolean isTableAlreadyBookedForAnotherBooking(Book oldBooking, Book newBooking)
+            throws BookingException {
+
+        String sql = """
+                SELECT COUNT(*) AS bookingCount
+                FROM Book
+                WHERE bookDate = ?
+                  AND bookHour = ?
+                  AND idTable = ?
+                  AND statusLabel <> 'Cancelled'
+                  AND NOT (
+                        bookDate = ?
+                    AND bookHour = ?
+                    AND idTable = ?
+                    AND nameCustomer = ?
+                  )
+                """;
+
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setDate(1, Date.valueOf(newBooking.getBookDate()));
+                statement.setTime(2, Time.valueOf(newBooking.getBookHour()));
+                statement.setInt(3, newBooking.getTable().getIdTable());
+
+                fillBookingPrimaryKey(statement, oldBooking, 4);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("bookingCount") > 0;
+                    }
+                }
+            }
+
+            return false;
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new BookingException(
+                    "Erreur lors de la vérification de disponibilité de la table.",
                     exception
             );
         }
@@ -229,6 +321,15 @@ public class BookingDBAccess implements BookingDataAccess {
         statement.setString(startIndex + 7, booking.getStatus().getStatusLabel());
     }
 
+    private void fillBookingPrimaryKey(PreparedStatement statement, Book booking, int startIndex)
+            throws SQLException {
+
+        statement.setDate(startIndex, Date.valueOf(booking.getBookDate()));
+        statement.setTime(startIndex + 1, Time.valueOf(booking.getBookHour()));
+        statement.setInt(startIndex + 2, booking.getTable().getIdTable());
+        statement.setString(startIndex + 3, booking.getNameCustomer());
+    }
+
     private void setNullableString(PreparedStatement statement, int index, String value)
             throws SQLException {
 
@@ -240,15 +341,15 @@ public class BookingDBAccess implements BookingDataAccess {
     }
 
     private Book createBookFromResultSet(ResultSet resultSet) throws SQLException {
-        Status status = new Status(
-                resultSet.getString("statusLabel")
-        );
+        Status tableStatus = new Status(resultSet.getString("tableStatusLabel"));
 
         Table table = new Table(
                 resultSet.getInt("idTable"),
                 resultSet.getInt("nbSeats"),
-                status
+                tableStatus
         );
+
+        Status bookingStatus = new Status(resultSet.getString("bookStatusLabel"));
 
         return new Book(
                 resultSet.getDate("bookDate").toLocalDate(),
@@ -258,90 +359,7 @@ public class BookingDBAccess implements BookingDataAccess {
                 resultSet.getInt("nbPerson"),
                 resultSet.getString("comment"),
                 resultSet.getString("telCustomer"),
-                status
+                bookingStatus
         );
-    }
-
-    @Override
-    public boolean isTableAlreadyBooked(Book booking) throws BookingException {
-        String sql = """
-            SELECT COUNT(*) AS nbBookings
-            FROM Book
-            WHERE bookDate = ?
-              AND bookHour = ?
-              AND idTable = ?
-              AND statusLabel <> 'Cancelled'
-            """;
-
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setDate(1, Date.valueOf(booking.getBookDate()));
-            statement.setTime(2, Time.valueOf(booking.getBookHour()));
-            statement.setInt(3, booking.getTable().getIdTable());
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("nbBookings") > 0;
-                }
-            }
-
-            return false;
-
-        } catch (SQLException | ConnectionException exception) {
-            throw new BookingException(
-                    "Erreur lors de la vérification de disponibilité de la table.",
-                    exception
-            );
-        }
-    }
-
-    @Override
-    public boolean isTableAlreadyBookedForAnotherBooking(Book oldBooking, Book newBooking)
-            throws BookingException {
-
-        String sql = """
-            SELECT COUNT(*) AS nbBookings
-            FROM Book
-            WHERE bookDate = ?
-              AND bookHour = ?
-              AND idTable = ?
-              AND statusLabel <> 'Cancelled'
-              AND NOT (
-                    bookDate = ?
-                AND bookHour = ?
-                AND idTable = ?
-                AND nameCustomer = ?
-              )
-            """;
-
-        try (
-                Connection connection = SingletonConnection.getInstance();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setDate(1, Date.valueOf(newBooking.getBookDate()));
-            statement.setTime(2, Time.valueOf(newBooking.getBookHour()));
-            statement.setInt(3, newBooking.getTable().getIdTable());
-
-            statement.setDate(4, Date.valueOf(oldBooking.getBookDate()));
-            statement.setTime(5, Time.valueOf(oldBooking.getBookHour()));
-            statement.setInt(6, oldBooking.getTable().getIdTable());
-            statement.setString(7, oldBooking.getNameCustomer());
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("nbBookings") > 0;
-                }
-            }
-
-            return false;
-
-        } catch (SQLException | ConnectionException exception) {
-            throw new BookingException(
-                    "Erreur lors de la vérification de disponibilité de la table.",
-                    exception
-            );
-        }
     }
 }

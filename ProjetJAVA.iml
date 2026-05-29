@@ -17,8 +17,8 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="flatlaf-3.7.1" level="project" />
-    <orderEntry type="library" name="flatlaf-3.7.1" level="application" />
-    <orderEntry type="module-library">
+    <orderEntry type="library" exported="" name="flatlaf-3.7.1" level="application" />
+    <orderEntry type="module-library" exported="">
       <library name="JUnit5">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/junit-jupiter-5.14.0.jar!/" />

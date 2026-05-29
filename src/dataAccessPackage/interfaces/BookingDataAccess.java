@@ -20,5 +20,6 @@ public interface BookingDataAccess {
 
     boolean isTableAlreadyBooked(Book booking) throws BookingException;
 
-    boolean isTableAlreadyBookedForAnotherBooking(Book oldBooking, Book newBooking) throws BookingException;
+    boolean isTableAlreadyBookedForAnotherBooking(Book oldBooking, Book newBooking)
+            throws BookingException;
 }

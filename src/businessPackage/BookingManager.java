@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class BookingManager {
 
-    private BookingDataAccess bookingDAO;
+    private final BookingDataAccess bookingDAO;
 
     public BookingManager() {
         bookingDAO = new BookingDBAccess();
@@ -21,6 +21,10 @@ public class BookingManager {
     }
 
     public ArrayList<Book> getBookingsByDate(LocalDate date) throws BookingException {
+        if (date == null) {
+            throw new BookingException("La date est obligatoire.");
+        }
+
         return bookingDAO.getBookingsByDate(date);
     }
 
@@ -29,7 +33,7 @@ public class BookingManager {
 
         if (bookingDAO.isTableAlreadyBooked(booking)) {
             throw new BookingException(
-                    "This table is already booked at this date and hour."
+                    "Cette table est déjà réservée à cette date et cette heure."
             );
         }
 
@@ -38,14 +42,14 @@ public class BookingManager {
 
     public void updateBooking(Book oldBooking, Book newBooking) throws BookingException {
         if (oldBooking == null) {
-            throw new BookingException("The booking to update is invalid.");
+            throw new BookingException("La réservation à modifier est invalide.");
         }
 
         validateBooking(newBooking);
 
         if (bookingDAO.isTableAlreadyBookedForAnotherBooking(oldBooking, newBooking)) {
             throw new BookingException(
-                    "This table is already booked at this date and hour."
+                    "Cette table est déjà réservée à cette date et cette heure."
             );
         }
 
@@ -90,8 +94,8 @@ public class BookingManager {
         }
 
         if (
-                booking.getStatus().getStatusLabel() == null ||
-                        booking.getStatus().getStatusLabel().isBlank()
+                booking.getStatus().getStatusLabel() == null
+                        || booking.getStatus().getStatusLabel().isBlank()
         ) {
             throw new BookingException("Le statut est obligatoire.");
         }
@@ -110,6 +114,10 @@ public class BookingManager {
 
         if (booking.getNbPerson() == null || booking.getNbPerson() <= 0) {
             throw new BookingException("Le nombre de personnes doit être supérieur à 0.");
+        }
+
+        if (booking.getTable().getNbSeats() == null || booking.getTable().getNbSeats() <= 0) {
+            throw new BookingException("La capacité de la table est invalide.");
         }
 
         if (booking.getNbPerson() > booking.getTable().getNbSeats()) {

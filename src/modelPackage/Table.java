@@ -1,23 +1,19 @@
 package modelPackage;
 
 public class Table {
-    private Integer idTabel;
+
+    private Integer idTable;
     private Integer nbSeats;
     private Status status;
 
-    public Table(Integer idTabel, Integer nbSeats, Status status) {
-        this.idTabel = idTabel;
+    public Table(Integer idTable, Integer nbSeats, Status status) {
+        this.idTable = idTable;
         this.nbSeats = nbSeats;
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "Table " + idTabel + " (" + nbSeats + " seats)";
-    }
-
     public Integer getIdTable() {
-        return idTabel;
+        return idTable;
     }
 
     public Integer getNbSeats() {
@@ -28,4 +24,8 @@ public class Table {
         return status;
     }
 
+    @Override
+    public String toString() {
+        return "Table " + idTable + " (" + nbSeats + " places)";
+    }
 }

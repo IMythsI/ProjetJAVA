@@ -1,6 +1,7 @@
 package modelPackage;
 
 public class Employee {
+
     private Integer registrationNb;
     private String lastName;
     private String firstName;
@@ -13,11 +14,28 @@ public class Employee {
         this.jobType = jobType;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public Integer getRegistrationNb() {
+        return registrationNb;
     }
 
     public String getLastName() {
         return lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public JobType getJobType() {
+        return jobType;
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    @Override
+    public String toString() {
+        return getFullName();
     }
 }
