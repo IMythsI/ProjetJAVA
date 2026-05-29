@@ -409,7 +409,6 @@ public class OrderDBAccess implements OrderDataAccess {
         try {
             connection.rollback();
         } catch (SQLException ignored) {
-            // Rollback failure ignored to preserve the original exception.
         }
     }
 
@@ -421,7 +420,61 @@ public class OrderDBAccess implements OrderDataAccess {
         try {
             connection.setAutoCommit(previousAutoCommit);
         } catch (SQLException ignored) {
-            // Restore failure ignored to preserve the original exception.
+        }
+    }
+
+    @Override
+    public void deleteOrder(Integer idOrder) throws OrderException {
+        String deleteLineOrdersSql = """
+            DELETE FROM LineOrder
+            WHERE idOrder = ?
+            """;
+
+        String deleteOrderSql = """
+            DELETE FROM CustomerOrder
+            WHERE idOrder = ?
+            """;
+
+        Connection connection = null;
+        boolean previousAutoCommit = true;
+
+        try {
+            connection = SingletonConnection.getInstance();
+
+            previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement lineStatement = connection.prepareStatement(deleteLineOrdersSql)) {
+                lineStatement.setInt(1, idOrder);
+                lineStatement.executeUpdate();
+            }
+
+            try (PreparedStatement orderStatement = connection.prepareStatement(deleteOrderSql)) {
+                orderStatement.setInt(1, idOrder);
+
+                int deletedRows = orderStatement.executeUpdate();
+
+                if (deletedRows == 0) {
+                    throw new OrderException("Aucune commande n'a été supprimée.");
+                }
+            }
+
+            connection.commit();
+
+        } catch (OrderException exception) {
+            rollback(connection);
+            throw exception;
+
+        } catch (SQLException | ConnectionException exception) {
+            rollback(connection);
+
+            throw new OrderException(
+                    "Erreur lors de la suppression de la commande.",
+                    exception
+            );
+
+        } finally {
+            restoreAutoCommit(connection, previousAutoCommit);
         }
     }
 }

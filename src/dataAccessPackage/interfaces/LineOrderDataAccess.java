@@ -12,4 +12,6 @@ public interface LineOrderDataAccess {
 
     ArrayList<LineOrder> getLineOrdersByOrder(Integer idOrder)
             throws LineOrderException;
+
+    void updateLineOrderStatus(Integer idLineOrder, String statusLabel) throws LineOrderException;
 }

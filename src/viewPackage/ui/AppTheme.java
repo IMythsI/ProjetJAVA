@@ -143,11 +143,26 @@ public final class AppTheme {
     public static final int JTABLE_ROW_HEIGHT = 34;
     public static final int TABLE_HEADER_HEIGHT = 45;
 
-    public static final int TABLE_MIN_HEIGHT = 100;
+    public static final int TABLE_MIN_HEIGHT = 150;
     public static final int TABLE_BASE_HEIGHT = 90;
 
     public static final int TABLE_ROW_HORIZONTAL_PADDING = 25;
     public static final int TABLE_ROW_VERTICAL_PADDING = 10;
+
+    //ORDER DETAIL
+    public static final int ORDER_DETAIL_ROW_HEIGHT = 50;
+    public static final int ORDER_DETAIL_CARD_MIN_WIDTH = 820;
+    public static final int ORDER_DETAIL_CARD_HEIGHT = 420;
+    public static final int ORDER_DETAIL_STATUS_COMBO_WIDTH = 170;
+    public static final int ORDER_DETAIL_STATUS_COMBO_MIN_WIDTH = 140;
+    public static final int ORDER_DETAIL_STATUS_COMBO_MAX_WIDTH = 220;
+
+    public static final double ORDER_DETAIL_PRODUCT_WEIGHT = 0.24;
+    public static final double ORDER_DETAIL_QUANTITY_WEIGHT = 0.10;
+    public static final double ORDER_DETAIL_EMPLOYEE_WEIGHT = 0.18;
+    public static final double ORDER_DETAIL_CURRENT_STATUS_WEIGHT = 0.16;
+    public static final double ORDER_DETAIL_NEW_STATUS_WEIGHT = 0.22;
+    public static final double ORDER_DETAIL_ACTION_WEIGHT = 0.10;
 
     //FLATLAF
     public static final String ROUND_BUTTON_STYLE =

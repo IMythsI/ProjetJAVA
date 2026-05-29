@@ -250,4 +250,33 @@ public class LineOrderDBAccess implements LineOrderDataAccess {
                 tableStatus
         );
     }
+
+    @Override
+    public void updateLineOrderStatus(Integer idLineOrder, String statusLabel) throws LineOrderException {
+        String sql = """
+            UPDATE LineOrder
+            SET statusLabel = ?
+            WHERE idLineOrder = ?
+            """;
+
+        try (
+                Connection connection = SingletonConnection.getInstance();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setString(1, statusLabel);
+            statement.setInt(2, idLineOrder);
+
+            int updatedRows = statement.executeUpdate();
+
+            if (updatedRows == 0) {
+                throw new LineOrderException("Aucune ligne de commande n'a été modifiée.");
+            }
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new LineOrderException(
+                    "Erreur lors de la modification du statut du produit.",
+                    exception
+            );
+        }
+    }
 }

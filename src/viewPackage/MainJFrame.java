@@ -8,10 +8,7 @@ import viewPackage.Booking.BookingFormPanel;
 import viewPackage.Booking.BookingListPanel;
 import viewPackage.Booking.BookingValidationPanel;
 import viewPackage.Dashboard.WaiterDashboardPanel;
-import viewPackage.Order.OrderCardsPanel;
-import viewPackage.Order.OrderListPanel;
-import viewPackage.Order.ProductSelectionPanel;
-import viewPackage.Order.TakeAwayOrderFormPanel;
+import viewPackage.Order.*;
 import viewPackage.Search.BookingSearchPanel;
 import viewPackage.Search.OrderSearchPanel;
 import viewPackage.Search.ProductSearchPanel;
@@ -339,6 +336,10 @@ public class MainJFrame extends JFrame {
 
     public void showProductSelectionPanel(Table table) {
         changePanel(new ProductSelectionPanel(this, table));
+    }
+
+    public void showOrderDetailPanel(Order order) {
+        changePanel(new OrderDetailPanel(this, order));
     }
 
     //TABLE

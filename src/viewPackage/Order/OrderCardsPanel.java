@@ -290,7 +290,12 @@ public class OrderCardsPanel extends AppPage {
     private JPanel createOrderRow(Order order) {
         JButton detailButton = ButtonFactory.createSmallIconButton(
                 "👁",
-                () -> showOrderDetails(order)
+                () -> mainWindow.showOrderDetailPanel(order)
+        );
+
+        JButton deleteButton = ButtonFactory.createSmallIconButton(
+                "🗑",
+                () -> confirmAndDeleteOrder(order)
         );
 
         return TableFactory.createDataRow(
@@ -314,8 +319,74 @@ public class OrderCardsPanel extends AppPage {
                         StatusHelper.getFrenchStatus(getOrderStatus(order)),
                         StatusHelper.getStatusColor(getOrderStatus(order))
                 ),
-                TableFactory.createActionPanel(detailButton)
+                TableFactory.createActionPanel(detailButton, deleteButton)
         );
+    }
+
+    private void confirmAndDeleteOrder(Order order) {
+        if (order == null || order.getIdOrder() == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "La commande sélectionnée est invalide.",
+                    "Erreur de suppression",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Voulez-vous vraiment supprimer la commande n°"
+                        + order.getIdOrder()
+                        + " ?\nToutes les lignes de commande associées seront supprimées.",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (choice != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        deleteOrder(order);
+    }
+
+    private void deleteOrder(Order order) {
+        LoadingHelper.runWithLoading(
+                ordersRowsPanel,
+                "Suppression de la commande...",
+                () -> {
+                    controller.deleteOrder(order.getIdOrder());
+                    return null;
+                },
+                ignored -> {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "La commande a bien été supprimée.",
+                            "Suppression réussie",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    loadOrders();
+                },
+                this::displayDeleteError
+        );
+    }
+
+    private void displayDeleteError(Exception exception) {
+        LoadingHelper.showError(
+                ordersRowsPanel,
+                "Impossible de supprimer la commande."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de suppression",
+                JOptionPane.ERROR_MESSAGE
+        );
+
+        loadOrders();
     }
 
     private String getOrderOrigin(Order order) {
@@ -378,13 +449,6 @@ public class OrderCardsPanel extends AppPage {
         boolean hasPreparation = false;
 
         for (LineOrder line : lines) {
-            if (line == null || line.getStatus() == null) {
-                allServed = false;
-                allReadyOrServed = false;
-                hasPreparation = true;
-                continue;
-            }
-
             String status = line.getStatus().getStatusLabel();
 
             if (!"Served".equals(status)) {
@@ -413,38 +477,6 @@ public class OrderCardsPanel extends AppPage {
         }
 
         return "Pending";
-    }
-
-    private void showOrderDetails(Order order) {
-        ArrayList<LineOrder> lines = lineOrdersByOrder.get(order.getIdOrder());
-
-        if (lines == null || lines.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Aucun produit dans cette commande.",
-                    "Détails de la commande",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            return;
-        }
-
-        StringBuilder message = new StringBuilder();
-
-        for (LineOrder line : lines) {
-            message.append(line.getQuantity())
-                    .append("x ")
-                    .append(line.getProduct().getProductLabel())
-                    .append(" - ")
-                    .append(StatusHelper.getFrenchStatus(line.getStatus().getStatusLabel()))
-                    .append("\n");
-        }
-
-        JOptionPane.showMessageDialog(
-                this,
-                message.toString(),
-                getOrderOrigin(order),
-                JOptionPane.INFORMATION_MESSAGE
-        );
     }
 
     private static class OrderCardsData {
