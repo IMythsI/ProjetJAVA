@@ -10,8 +10,8 @@ Ce projet a été réalisé dans le cadre du cours de développement d’applica
 
 | Nom | Prénom | Email |
 |---|---|---|
-| À compléter | À compléter | À compléter |
-| À compléter | À compléter | À compléter |
+| Degand | Mathys | etu57241@henallux.be |
+| Tran | Leny | etu53209@henallux.be |
 
 ---
 
