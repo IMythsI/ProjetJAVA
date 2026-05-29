@@ -4,44 +4,35 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class Order {
+
     private Integer idOrder;
     private String comment;
     private Integer guestCount;
     private LocalDate orderDate;
-    private Boolean isTakeAway;
-    private LocalTime pickupTime;
+    private Boolean takeAway;
+    private LocalTime pickUpTime;
     private String nameCustomer;
     private String telCustomer;
     private Table table;
 
-    public Order(Integer idOrder, String comment, Integer guestCount,
-                 LocalDate orderDate, Boolean isTakeAway,
-                 LocalTime pickUpTime, String nameCustomer,
-                 String telCustomer, Table table) {
+    public Order(Integer idOrder,
+                 String comment,
+                 Integer guestCount,
+                 LocalDate orderDate,
+                 Boolean takeAway,
+                 LocalTime pickUpTime,
+                 String nameCustomer,
+                 String telCustomer,
+                 Table table) {
         this.idOrder = idOrder;
         this.comment = comment;
         this.guestCount = guestCount;
         this.orderDate = orderDate;
-        this.isTakeAway = isTakeAway;
-        this.pickupTime = pickUpTime;
+        this.takeAway = takeAway;
+        this.pickUpTime = pickUpTime;
         this.nameCustomer = nameCustomer;
         this.telCustomer = telCustomer;
         this.table = table;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "idOrder=" + idOrder +
-                ", comment='" + comment + '\'' +
-                ", guestCount=" + guestCount +
-                ", orderDate=" + orderDate +
-                ", isTakeAway=" + isTakeAway +
-                ", pickupTime=" + pickupTime +
-                ", nameCustomer='" + nameCustomer + '\'' +
-                ", telCustomer='" + telCustomer + '\'' +
-                ", table=" + table +
-                '}';
     }
 
     public Integer getIdOrder() {
@@ -61,11 +52,19 @@ public class Order {
     }
 
     public Boolean getTakeAway() {
-        return isTakeAway;
+        return takeAway;
+    }
+
+    public boolean getIsTakeAway() {
+        return Boolean.TRUE.equals(takeAway);
+    }
+
+    public LocalTime getPickUpTime() {
+        return pickUpTime;
     }
 
     public LocalTime getPickupTime() {
-        return pickupTime;
+        return pickUpTime;
     }
 
     public String getNameCustomer() {
@@ -80,15 +79,8 @@ public class Order {
         return table;
     }
 
-    public boolean getIsTakeAway() {
-        return  isTakeAway;
-    }
-
-    public LocalTime getPickUpTime() {
-        return pickupTime;
-    }
-
-    public Status getStatus() {
-        return new Status("Pending");
+    @Override
+    public String toString() {
+        return "Commande " + idOrder;
     }
 }

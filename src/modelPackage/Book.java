@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class Book {
+
     private LocalDate bookDate;
     private LocalTime bookHour;
     private Table table;
@@ -13,7 +14,14 @@ public class Book {
     private String telCustomer;
     private Status status;
 
-    public Book(LocalDate bookDate, LocalTime bookHour, Table table, String nameCustomer, Integer nbPerson, String comment, String telCustomer,  Status status) {
+    public Book(LocalDate bookDate,
+                LocalTime bookHour,
+                Table table,
+                String nameCustomer,
+                Integer nbPerson,
+                String comment,
+                String telCustomer,
+                Status status) {
         this.bookDate = bookDate;
         this.bookHour = bookHour;
         this.table = table;

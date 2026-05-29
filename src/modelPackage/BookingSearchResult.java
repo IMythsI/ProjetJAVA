@@ -8,17 +8,17 @@ public class BookingSearchResult {
     private LocalDate bookDate;
     private LocalTime bookHour;
     private String customerName;
-    private int tableId;
-    private int nbSeats;
-    private int nbPerson;
+    private Integer tableId;
+    private Integer nbSeats;
+    private Integer nbPerson;
     private String statusLabel;
 
     public BookingSearchResult(LocalDate bookDate,
                                LocalTime bookHour,
                                String customerName,
-                               int tableId,
-                               int nbSeats,
-                               int nbPerson,
+                               Integer tableId,
+                               Integer nbSeats,
+                               Integer nbPerson,
                                String statusLabel) {
         this.bookDate = bookDate;
         this.bookHour = bookHour;
@@ -41,15 +41,15 @@ public class BookingSearchResult {
         return customerName;
     }
 
-    public int getTableId() {
+    public Integer getTableId() {
         return tableId;
     }
 
-    public int getNbSeats() {
+    public Integer getNbSeats() {
         return nbSeats;
     }
 
-    public int getNbPerson() {
+    public Integer getNbPerson() {
         return nbPerson;
     }
 

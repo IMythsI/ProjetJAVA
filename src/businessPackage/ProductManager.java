@@ -8,7 +8,8 @@ import modelPackage.Product;
 import java.util.ArrayList;
 
 public class ProductManager {
-    private ProductDataAccess productDAO;
+
+    private final ProductDataAccess productDAO;
 
     public ProductManager() {
         productDAO = new ProductDBAccess();

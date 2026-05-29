@@ -5,25 +5,25 @@ import java.time.LocalTime;
 
 public class OrderSearchResult {
 
-    private int orderId;
+    private Integer orderId;
     private LocalDate orderDate;
     private Integer guestCount;
-    private boolean takeAway;
+    private Boolean takeAway;
     private LocalTime pickUpTime;
     private Integer tableId;
     private String waiterName;
     private String statusLabel;
-    private double totalAmount;
+    private Double totalAmount;
 
-    public OrderSearchResult(int orderId,
+    public OrderSearchResult(Integer orderId,
                              LocalDate orderDate,
                              Integer guestCount,
-                             boolean takeAway,
+                             Boolean takeAway,
                              LocalTime pickUpTime,
                              Integer tableId,
                              String waiterName,
                              String statusLabel,
-                             double totalAmount) {
+                             Double totalAmount) {
         this.orderId = orderId;
         this.orderDate = orderDate;
         this.guestCount = guestCount;
@@ -35,7 +35,7 @@ public class OrderSearchResult {
         this.totalAmount = totalAmount;
     }
 
-    public int getOrderId() {
+    public Integer getOrderId() {
         return orderId;
     }
 
@@ -47,8 +47,12 @@ public class OrderSearchResult {
         return guestCount;
     }
 
-    public boolean isTakeAway() {
+    public Boolean getTakeAway() {
         return takeAway;
+    }
+
+    public boolean isTakeAway() {
+        return Boolean.TRUE.equals(takeAway);
     }
 
     public LocalTime getPickUpTime() {
@@ -67,7 +71,7 @@ public class OrderSearchResult {
         return statusLabel;
     }
 
-    public double getTotalAmount() {
+    public Double getTotalAmount() {
         return totalAmount;
     }
 }

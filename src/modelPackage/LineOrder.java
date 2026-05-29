@@ -1,6 +1,7 @@
 package modelPackage;
 
 public class LineOrder {
+
     private Integer idLineOrder;
     private Integer quantity;
     private Product product;
@@ -8,7 +9,12 @@ public class LineOrder {
     private Order order;
     private Status status;
 
-    public LineOrder(Integer idLineOrder, Integer quantity, Product product, Employee employee, Order order, Status status) {
+    public LineOrder(Integer idLineOrder,
+                     Integer quantity,
+                     Product product,
+                     Employee employee,
+                     Order order,
+                     Status status) {
         this.idLineOrder = idLineOrder;
         this.quantity = quantity;
         this.product = product;
@@ -17,20 +23,24 @@ public class LineOrder {
         this.status = status;
     }
 
+    public Integer getIdLineOrder() {
+        return idLineOrder;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
     public Product getProduct() {
         return product;
     }
 
-    public int  getQuantity() {
-        return quantity;
-    }
-
-    public int getIdLineOrder() {
-        return idLineOrder;
-    }
-
     public Employee getEmployee() {
         return employee;
+    }
+
+    public Order getOrder() {
+        return order;
     }
 
     public Status getStatus() {

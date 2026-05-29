@@ -1,28 +1,45 @@
 package viewPackage;
 
-import modelPackage.*;
-import viewPackage.Booking.*;
-import viewPackage.Dashboard.*;
-import viewPackage.Order.*;
-import viewPackage.Table.*;
-import viewPackage.Search.*;
+import modelPackage.Book;
+import modelPackage.Order;
+import modelPackage.Table;
+import viewPackage.Booking.BookingEditPanel;
+import viewPackage.Booking.BookingFormPanel;
+import viewPackage.Booking.BookingListPanel;
+import viewPackage.Booking.BookingValidationPanel;
+import viewPackage.Dashboard.WaiterDashboardPanel;
+import viewPackage.Order.OrderCardsPanel;
+import viewPackage.Order.OrderListPanel;
+import viewPackage.Order.ProductSelectionPanel;
+import viewPackage.Order.TakeAwayOrderFormPanel;
+import viewPackage.Search.BookingSearchPanel;
+import viewPackage.Search.OrderSearchPanel;
+import viewPackage.Search.ProductSearchPanel;
+import viewPackage.Table.TableDetailPanel;
+import viewPackage.Table.TableListPanel;
+import viewPackage.ui.AppTheme;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class MainJFrame extends JFrame {
 
-    private JPanel mainPanelContainer;
-    private Stack<JPanel> navigationStack;
+    private final JPanel mainPanelContainer;
+    private final Deque<JPanel> navigationStack;
 
     public MainJFrame() {
-        super("Restaurant Management");
+        super("Gestion du restaurant");
 
-        navigationStack = new Stack<>();
+        navigationStack = new ArrayDeque<>();
 
-        setBounds(100, 100, 1100, 700);
+        setSize(1100, 720);
+        setMinimumSize(new Dimension(
+                AppTheme.WINDOW_MIN_WIDTH,
+                AppTheme.WINDOW_MIN_HEIGHT
+        ));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -37,6 +54,7 @@ public class MainJFrame extends JFrame {
         showWelcomePanel();
     }
 
+    //MENU
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
@@ -51,10 +69,17 @@ public class MainJFrame extends JFrame {
     }
 
     private JMenu createFileMenu() {
-        JMenu fileMenu = new JMenu("File");
+        JMenu fileMenu = new JMenu("Fichier");
 
-        JMenuItem homeItem = createMenuItem("Home", e -> showWelcomePanel());
-        JMenuItem exitItem = createMenuItem("Exit", e -> System.exit(0));
+        JMenuItem homeItem = createMenuItem(
+                "Accueil",
+                event -> showWelcomePanel()
+        );
+
+        JMenuItem exitItem = createMenuItem(
+                "Quitter",
+                event -> System.exit(0)
+        );
 
         fileMenu.add(homeItem);
         fileMenu.addSeparator();
@@ -64,26 +89,26 @@ public class MainJFrame extends JFrame {
     }
 
     private JMenu createBookingMenu() {
-        JMenu bookingMenu = new JMenu("Bookings");
+        JMenu bookingMenu = new JMenu("Réservations");
 
         JMenuItem listBookingsItem = createMenuItem(
-                "List bookings",
-                e -> showBookingListPanel()
+                "Lister les réservations",
+                event -> showBookingListPanel()
         );
 
         JMenuItem addBookingItem = createMenuItem(
-                "New booking",
-                e -> showBookingFormPanel()
+                "Nouvelle réservation",
+                event -> showBookingFormPanel()
         );
 
         JMenuItem editBookingItem = createMenuItem(
-                "Edit booking",
-                e -> showBookingEditPanel()
+                "Modifier une réservation",
+                event -> showBookingEditPanel()
         );
 
         JMenuItem deleteBookingItem = createMenuItem(
-                "Delete booking",
-                e -> showBookingDeletePanel()
+                "Supprimer une réservation",
+                event -> showBookingDeletePanel()
         );
 
         bookingMenu.add(listBookingsItem);
@@ -96,21 +121,21 @@ public class MainJFrame extends JFrame {
     }
 
     private JMenu createSearchMenu() {
-        JMenu searchMenu = new JMenu("Search");
+        JMenu searchMenu = new JMenu("Recherches");
 
         JMenuItem bookingSearchItem = createMenuItem(
-                "Bookings by customer and date",
-                e -> showBookingSearchPanel()
+                "Réservations par client et date",
+                event -> showBookingSearchPanel()
         );
 
         JMenuItem orderSearchItem = createMenuItem(
-                "Orders by waiter and status",
-                e -> showOrderSearchPanel()
+                "Commandes par employé et statut",
+                event -> showOrderSearchPanel()
         );
 
         JMenuItem productSearchItem = createMenuItem(
-                "Products by type and allergy",
-                e -> showProductSearchPanel()
+                "Produits par type et allergène",
+                event -> showProductSearchPanel()
         );
 
         searchMenu.add(bookingSearchItem);
@@ -121,11 +146,11 @@ public class MainJFrame extends JFrame {
     }
 
     private JMenu createBusinessMenu() {
-        JMenu businessMenu = new JMenu("Business");
+        JMenu businessMenu = new JMenu("Métier");
 
         JMenuItem validateBookingItem = createMenuItem(
-                "Validate booking capacity",
-                e -> showBookingValidationPanel()
+                "Valider une capacité de réservation",
+                event -> showBookingValidationPanel()
         );
 
         businessMenu.add(validateBookingItem);
@@ -134,21 +159,21 @@ public class MainJFrame extends JFrame {
     }
 
     private JMenu createOrderMenu() {
-        JMenu orderMenu = new JMenu("Orders");
+        JMenu orderMenu = new JMenu("Commandes");
 
         JMenuItem orderCardsItem = createMenuItem(
-                "Current orders",
-                e -> showOrderCardsPanel()
+                "Commandes en cours",
+                event -> showOrderCardsPanel()
         );
 
         JMenuItem orderListItem = createMenuItem(
-                "List orders",
-                e -> showOrderListPanel()
+                "Lister les commandes",
+                event -> showOrderListPanel()
         );
 
         JMenuItem takeAwayOrderItem = createMenuItem(
-                "New takeaway order",
-                e -> showTakeAwayOrderFormPanel()
+                "Nouvelle commande à emporter",
+                event -> showTakeAwayOrderFormPanel()
         );
 
         orderMenu.add(orderCardsItem);
@@ -163,8 +188,8 @@ public class MainJFrame extends JFrame {
         JMenu tableMenu = new JMenu("Tables");
 
         JMenuItem listTablesItem = createMenuItem(
-                "List tables",
-                e -> showTableListPanel()
+                "Lister les tables",
+                event -> showTableListPanel()
         );
 
         tableMenu.add(listTablesItem);
@@ -174,21 +199,52 @@ public class MainJFrame extends JFrame {
 
     private JMenuItem createMenuItem(String text, ActionListener listener) {
         JMenuItem item = new JMenuItem(text);
+
         item.addActionListener(listener);
+
         return item;
     }
 
+    //NAVIGATION
     public void changePanel(JPanel panel) {
-        Component currentComponent = null;
-
-        if (mainPanelContainer.getComponentCount() > 0) {
-            currentComponent = mainPanelContainer.getComponent(0);
+        if (panel == null) {
+            return;
         }
 
-        if (currentComponent instanceof JPanel currentPanel) {
+        JPanel currentPanel = getCurrentPanel();
+
+        if (currentPanel != null) {
             navigationStack.push(currentPanel);
         }
 
+        displayPanel(panel);
+    }
+
+    public void goBack() {
+        if (navigationStack.isEmpty()) {
+            showWelcomePanel();
+            return;
+        }
+
+        JPanel previousPanel = navigationStack.pop();
+        displayPanel(previousPanel);
+    }
+
+    private JPanel getCurrentPanel() {
+        if (mainPanelContainer.getComponentCount() == 0) {
+            return null;
+        }
+
+        Component currentComponent = mainPanelContainer.getComponent(0);
+
+        if (currentComponent instanceof JPanel currentPanel) {
+            return currentPanel;
+        }
+
+        return null;
+    }
+
+    private void displayPanel(JPanel panel) {
         mainPanelContainer.removeAll();
         mainPanelContainer.add(panel, BorderLayout.CENTER);
 
@@ -196,29 +252,12 @@ public class MainJFrame extends JFrame {
         mainPanelContainer.repaint();
     }
 
-    public void goBack() {
-        if (!navigationStack.isEmpty()) {
-            JPanel previousPanel = navigationStack.pop();
-
-            mainPanelContainer.removeAll();
-            mainPanelContainer.add(previousPanel, BorderLayout.CENTER);
-
-            mainPanelContainer.revalidate();
-            mainPanelContainer.repaint();
-        }
-    }
-
     public void showWelcomePanel() {
         navigationStack.clear();
-
-        mainPanelContainer.removeAll();
-        mainPanelContainer.add(new WelcomePanel(this), BorderLayout.CENTER);
-
-        mainPanelContainer.revalidate();
-        mainPanelContainer.repaint();
+        displayPanel(new WelcomePanel(this));
     }
 
-
+    //DASHBOARD
     public void showWaiterPanel() {
         changePanel(new WaiterDashboardPanel(this));
     }
@@ -233,15 +272,34 @@ public class MainJFrame extends JFrame {
     }
 
     public void showBookingEditPanel(Book booking) {
+        if (booking == null) {
+            showBookingEditPanel();
+            return;
+        }
+
         changePanel(new BookingEditPanel(this, booking));
     }
 
     public void showBookingEditPanel() {
-        showNotImplementedMessage("Edit booking");
+        changePanel(new BookingListPanel(this));
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Sélectionnez une réservation puis cliquez sur le bouton modifier.",
+                "Modification d'une réservation",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
     public void showBookingDeletePanel() {
-        showNotImplementedMessage("Delete booking");
+        changePanel(new BookingListPanel(this));
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Sélectionnez une réservation puis cliquez sur le bouton supprimer.",
+                "Suppression d'une réservation",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
     //SEARCH
@@ -292,17 +350,13 @@ public class MainJFrame extends JFrame {
         changePanel(new TableDetailPanel(this, table));
     }
 
-    //OTHER
+
+
     public void showAllergiesPanel() {
-        showNotImplementedMessage("Allergies");
+        showProductSearchPanel();
     }
 
-    private void showNotImplementedMessage(String featureName) {
-        JOptionPane.showMessageDialog(
-                this,
-                featureName + " is not implemented yet.",
-                "Feature not implemented",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+    public void showMenuPanel() {
+        showProductSearchPanel();
     }
 }

@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BookingManagerTest {
 
@@ -23,47 +25,22 @@ public class BookingManagerTest {
     }
 
     @Test
-    public void validateBookingCapacity_shouldAcceptBookingWhenCapacityIsEnough()
-            throws BookingException {
+    public void validateBookingCapacity_shouldAcceptBookingWhenCapacityIsEnough() {
+        Book booking = createBooking(4, 4);
 
-        Table table = new Table(
-                1,
-                4,
-                new Status("Available")
-        );
+        assertDoesNotThrow(() -> bookingManager.validateBookingCapacity(booking));
+    }
 
-        Book booking = new Book(
-                LocalDate.now(),
-                LocalTime.of(19, 0),
-                table,
-                "Test Customer",
-                4,
-                null,
-                null,
-                new Status("Reserved")
-        );
+    @Test
+    public void validateBookingCapacity_shouldAcceptBookingWhenPeopleAreLessThanCapacity() {
+        Book booking = createBooking(2, 4);
 
         assertDoesNotThrow(() -> bookingManager.validateBookingCapacity(booking));
     }
 
     @Test
     public void validateBookingCapacity_shouldRejectBookingWhenTooManyPeople() {
-        Table table = new Table(
-                1,
-                2,
-                new Status("Available")
-        );
-
-        Book booking = new Book(
-                LocalDate.now(),
-                LocalTime.of(19, 0),
-                table,
-                "Test Customer",
-                3,
-                null,
-                null,
-                new Status("Reserved")
-        );
+        Book booking = createBooking(5, 4);
 
         BookingException exception = assertThrows(
                 BookingException.class,
@@ -77,12 +54,25 @@ public class BookingManagerTest {
     }
 
     @Test
+    public void validateBookingCapacity_shouldRejectNullBooking() {
+        BookingException exception = assertThrows(
+                BookingException.class,
+                () -> bookingManager.validateBookingCapacity(null)
+        );
+
+        assertEquals(
+                "La réservation est invalide.",
+                exception.getMessage()
+        );
+    }
+
+    @Test
     public void validateBookingCapacity_shouldRejectBookingWithoutTable() {
         Book booking = new Book(
                 LocalDate.now(),
                 LocalTime.of(19, 0),
                 null,
-                "Test Customer",
+                "Client test",
                 2,
                 null,
                 null,
@@ -101,23 +91,8 @@ public class BookingManagerTest {
     }
 
     @Test
-    public void validateBookingCapacity_shouldRejectBookingWithInvalidPeopleNumber() {
-        Table table = new Table(
-                1,
-                4,
-                new Status("Available")
-        );
-
-        Book booking = new Book(
-                LocalDate.now(),
-                LocalTime.of(19, 0),
-                table,
-                "Test Customer",
-                0,
-                null,
-                null,
-                new Status("Reserved")
-        );
+    public void validateBookingCapacity_shouldRejectBookingWithZeroPeople() {
+        Book booking = createBooking(0, 4);
 
         BookingException exception = assertThrows(
                 BookingException.class,
@@ -127,6 +102,55 @@ public class BookingManagerTest {
         assertEquals(
                 "Le nombre de personnes doit être supérieur à 0.",
                 exception.getMessage()
+        );
+    }
+
+    @Test
+    public void validateBookingCapacity_shouldRejectBookingWithNegativePeople() {
+        Book booking = createBooking(-1, 4);
+
+        BookingException exception = assertThrows(
+                BookingException.class,
+                () -> bookingManager.validateBookingCapacity(booking)
+        );
+
+        assertEquals(
+                "Le nombre de personnes doit être supérieur à 0.",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void validateBookingCapacity_shouldRejectTableWithInvalidCapacity() {
+        Book booking = createBooking(2, 0);
+
+        BookingException exception = assertThrows(
+                BookingException.class,
+                () -> bookingManager.validateBookingCapacity(booking)
+        );
+
+        assertEquals(
+                "La capacité de la table est invalide.",
+                exception.getMessage()
+        );
+    }
+
+    private Book createBooking(Integer numberOfPeople, Integer tableCapacity) {
+        Table table = new Table(
+                1,
+                tableCapacity,
+                new Status("Available")
+        );
+
+        return new Book(
+                LocalDate.now(),
+                LocalTime.of(19, 0),
+                table,
+                "Client test",
+                numberOfPeople,
+                null,
+                null,
+                new Status("Reserved")
         );
     }
 }

@@ -1,20 +1,19 @@
 package modelPackage;
 
 public class Status {
-    private String statuslabel;
 
-    public Status(String statuslabel) {
-        this.statuslabel = statuslabel;
+    private String statusLabel;
+
+    public Status(String statusLabel) {
+        this.statusLabel = statusLabel;
+    }
+
+    public String getStatusLabel() {
+        return statusLabel;
     }
 
     @Override
     public String toString() {
-        return "Status{" +
-                "statuslabel='" + statuslabel + '\'' +
-                '}';
-    }
-
-    public String getStatusLabel() {
-        return statuslabel;
+        return statusLabel;
     }
 }

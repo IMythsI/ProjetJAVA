@@ -3,14 +3,14 @@ package modelPackage;
 public class ProductSearchResult {
 
     private String productLabel;
-    private double price;
+    private Double price;
     private String description;
     private String typeLabel;
     private String ingredientLabel;
     private String allergyLabel;
 
     public ProductSearchResult(String productLabel,
-                               double price,
+                               Double price,
                                String description,
                                String typeLabel,
                                String ingredientLabel,
@@ -27,7 +27,7 @@ public class ProductSearchResult {
         return productLabel;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
