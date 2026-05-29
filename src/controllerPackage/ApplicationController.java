@@ -159,4 +159,16 @@ public class ApplicationController {
 
         return searchManager.searchProductsByTypeAndAllergy(typeLabel, allergyLabel);
     }
+
+    public void addProduct(Product product) throws ProductException {
+        productManager.addProduct(product);
+    }
+
+    public void updateProduct(Product oldProduct, Product newProduct) throws ProductException {
+        productManager.updateProduct(oldProduct, newProduct);
+    }
+
+    public void deleteProduct(Product product) throws ProductException {
+        productManager.deleteProduct(product);
+    }
 }

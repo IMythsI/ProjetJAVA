@@ -52,7 +52,7 @@ public class WelcomePanel extends AppPage {
                 "🍸",
                 "Barman",
                 "Gestion des boissons et commandes",
-                () -> mainWindow.showOrderCardsPanel()
+                () -> mainWindow.showBarmanPanel()
         ));
 
         cardsPanel.add(createRoleCard(
@@ -66,14 +66,14 @@ public class WelcomePanel extends AppPage {
                 "📊",
                 "Gérant",
                 "Statistiques et gestion du restaurant",
-                () -> mainWindow.showBookingValidationPanel()
+                () -> mainWindow.showManagerPanel()
         ));
 
         cardsPanel.add(createRoleCard(
                 "👨‍🍳",
                 "Cuisinier",
                 "Préparation et suivi des commandes",
-                () -> mainWindow.showOrderCardsPanel()
+                () -> mainWindow.showCookPanel()
         ));
 
         wrapper.add(cardsPanel);

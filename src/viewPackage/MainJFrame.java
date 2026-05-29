@@ -3,21 +3,29 @@ package viewPackage;
 import modelPackage.Book;
 import modelPackage.Order;
 import modelPackage.Table;
+import modelPackage.Product;
 import viewPackage.Booking.BookingEditPanel;
 import viewPackage.Booking.BookingFormPanel;
 import viewPackage.Booking.BookingListPanel;
 import viewPackage.Booking.BookingValidationPanel;
 import viewPackage.Dashboard.WaiterDashboardPanel;
+import viewPackage.Dashboard.BarmanDashboardPanel;
+import viewPackage.Dashboard.CookDashboardPanel;
+import viewPackage.Dashboard.ManagerDashboardPanel;
 import viewPackage.Order.OrderCardsPanel;
 import viewPackage.Order.OrderListPanel;
 import viewPackage.Order.ProductSelectionPanel;
 import viewPackage.Order.TakeAwayOrderFormPanel;
+import viewPackage.Product.ProductManagementPanel;
+import viewPackage.Product.ProductFormPanel;
+import viewPackage.Product.ProductEditPanel;
 import viewPackage.Search.BookingSearchPanel;
 import viewPackage.Search.OrderSearchPanel;
 import viewPackage.Search.ProductSearchPanel;
 import viewPackage.Table.TableDetailPanel;
 import viewPackage.Table.TableListPanel;
 import viewPackage.ui.AppTheme;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -258,9 +266,10 @@ public class MainJFrame extends JFrame {
     }
 
     //DASHBOARD
-    public void showWaiterPanel() {
-        changePanel(new WaiterDashboardPanel(this));
-    }
+    public void showWaiterPanel() {changePanel(new WaiterDashboardPanel(this));}
+    public void showBarmanPanel() {changePanel(new BarmanDashboardPanel(this));}
+    public void showCookPanel() {changePanel(new CookDashboardPanel(this));}
+    public void showManagerPanel() {changePanel(new ManagerDashboardPanel(this));}
 
     //BOOKING
     public void showBookingListPanel() {
@@ -340,6 +349,10 @@ public class MainJFrame extends JFrame {
     public void showProductSelectionPanel(Table table) {
         changePanel(new ProductSelectionPanel(this, table));
     }
+    //PRODUCT
+    public void showProductManagementPanel() {changePanel(new ProductManagementPanel(this));}
+    public void showProductFormPanel() {changePanel(new ProductFormPanel(this));}
+    public void showProductEditPanel(Product product) {changePanel(new ProductEditPanel(this, product));}
 
     //TABLE
     public void showTableListPanel() {
