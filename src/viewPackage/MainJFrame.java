@@ -1,31 +1,12 @@
 package viewPackage;
 
-import modelPackage.Book;
-import modelPackage.Order;
-import modelPackage.Table;
-import modelPackage.Product;
-import modelPackage.Product;
-import viewPackage.Product.ProductManagementPanel;
-import viewPackage.Product.ProductFormPanel;
-import viewPackage.Product.ProductEditPanel;
-import viewPackage.Booking.BookingEditPanel;
-import viewPackage.Booking.BookingFormPanel;
-import viewPackage.Booking.BookingListPanel;
-import viewPackage.Booking.BookingValidationPanel;
-import viewPackage.Dashboard.WaiterDashboardPanel;
-import viewPackage.Dashboard.BarmanDashboardPanel;
-import viewPackage.Dashboard.CookDashboardPanel;
-import viewPackage.Dashboard.ManagerDashboardPanel;
+import modelPackage.*;
+import viewPackage.Product.*;
+import viewPackage.Booking.*;
+import viewPackage.Dashboard.*;
 import viewPackage.Order.*;
-import viewPackage.Product.ProductManagementPanel;
-import viewPackage.Product.ProductFormPanel;
-import viewPackage.Product.ProductEditPanel;
-import viewPackage.Search.BookingSearchPanel;
-import viewPackage.Search.OrderSearchPanel;
-import viewPackage.Search.ProductSearchPanel;
-import viewPackage.Table.TableDetailPanel;
-import viewPackage.Table.TableFormPanel;
-import viewPackage.Table.TableListPanel;
+import viewPackage.Search.*;
+import viewPackage.Table.*;
 import viewPackage.ui.AppTheme;
 
 import viewPackage.Dashboard.BarmanDashboardPanel;
@@ -178,19 +159,18 @@ public class MainJFrame extends JFrame {
         );
 
         JMenuItem orderListItem = createMenuItem(
-                "Lister les commandes",
+                "Gérer les commandes",
                 event -> showOrderListPanel()
         );
 
-        JMenuItem takeAwayOrderItem = createMenuItem(
-                "Nouvelle commande à emporter",
-                event -> showTakeAwayOrderFormPanel()
+        JMenuItem orderCrudAddItem = createMenuItem(
+                "Ajouter une commande",
+                event -> showOrderFormPanel()
         );
 
         orderMenu.add(orderCardsItem);
         orderMenu.add(orderListItem);
-        orderMenu.addSeparator();
-        orderMenu.add(takeAwayOrderItem);
+        orderMenu.add(orderCrudAddItem);
 
         return orderMenu;
     }
@@ -356,6 +336,19 @@ public class MainJFrame extends JFrame {
 
     public void showProductSelectionPanel(Table table) {
         changePanel(new ProductSelectionPanel(this, table));
+    }
+
+    public void showOrderFormPanel() {
+        changePanel(new OrderFormPanel(this));
+    }
+
+    public void showOrderEditPanel(Order order) {
+        if (order == null) {
+            showOrderListPanel();
+            return;
+        }
+
+        changePanel(new OrderFormPanel(this, order));
     }
 
     //TABLE

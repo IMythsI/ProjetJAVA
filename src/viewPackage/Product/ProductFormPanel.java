@@ -1,6 +1,7 @@
 package viewPackage.Product;
 
 import controllerPackage.ApplicationController;
+import exceptionPackage.SearchException;
 import modelPackage.Product;
 import modelPackage.Type;
 import viewPackage.MainJFrame;
@@ -49,14 +50,8 @@ public class ProductFormPanel extends AppPage {
         priceField = new JTextField();
         descriptionField = new JTextField();
 
-        typeComboBox = new JComboBox<>(
-                new String[]{
-                        "Dish",
-                        "Drink",
-                        "Dessert",
-                        "Menu"
-                }
-        );
+        typeComboBox = new JComboBox<>();
+        loadProductTypes();
 
 
         panel.add(new JLabel("Nom :"));
@@ -84,6 +79,23 @@ public class ProductFormPanel extends AppPage {
         return panel;
     }
 
+    private void loadProductTypes() {
+        try {
+            typeComboBox.removeAllItems();
+
+            for (String typeLabel : controller.getProductTypes()) {
+                typeComboBox.addItem(typeLabel);
+            }
+
+        } catch (SearchException exception) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    exception.getMessage(),
+                    "Erreur de chargement des types",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
 
     private void saveProduct(){
 
@@ -93,9 +105,7 @@ public class ProductFormPanel extends AppPage {
                     nameField.getText(),
                     new BigDecimal(priceField.getText()),
                     descriptionField.getText(),
-                    new Type(
-                            typeComboBox.getSelectedItem().toString()
-                    )
+                    new Type(typeComboBox.getSelectedItem().toString())
             );
 
 

@@ -149,6 +149,78 @@ public class OrderDBAccess implements OrderDataAccess {
     }
 
     @Override
+    public void addOrder(Order order) throws OrderException {
+        String sql = """
+            INSERT INTO CustomerOrder (
+                comment,
+                guestCount,
+                orderDate,
+                isTakeAway,
+                pickUpTime,
+                nameCustomer,
+                telCustomer,
+                idTable
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                fillOrderStatement(statement, order);
+                statement.executeUpdate();
+            }
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new OrderException(
+                    "Erreur lors de l'ajout de la commande.",
+                    exception
+            );
+        }
+    }
+
+    @Override
+    public void updateOrder(Order order) throws OrderException {
+        String sql = """
+            UPDATE CustomerOrder
+            SET comment = ?,
+                guestCount = ?,
+                orderDate = ?,
+                isTakeAway = ?,
+                pickUpTime = ?,
+                nameCustomer = ?,
+                telCustomer = ?,
+                idTable = ?
+            WHERE idOrder = ?
+            """;
+
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                fillOrderStatement(statement, order);
+                statement.setInt(9, order.getIdOrder());
+
+                int updatedRows = statement.executeUpdate();
+
+                if (updatedRows == 0) {
+                    throw new OrderException("Aucune commande n'a été modifiée.");
+                }
+            }
+
+        } catch (OrderException exception) {
+            throw exception;
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new OrderException(
+                    "Erreur lors de la modification de la commande.",
+                    exception
+            );
+        }
+    }
+
+    @Override
     public void addOrderWithLines(Order order, Map<Product, Integer> cart)
             throws OrderException {
 
@@ -470,6 +542,72 @@ public class OrderDBAccess implements OrderDataAccess {
 
             throw new OrderException(
                     "Erreur lors de la suppression de la commande.",
+                    exception
+            );
+
+        } finally {
+            restoreAutoCommit(connection, previousAutoCommit);
+        }
+    }
+
+    @Override
+    public void deleteOrders(ArrayList<Integer> orderIds) throws OrderException {
+        if (orderIds == null || orderIds.isEmpty()) {
+            throw new OrderException("Aucune commande n'a été supprimée.");
+        }
+
+        String deleteLineOrdersSql = """
+            DELETE FROM LineOrder
+            WHERE idOrder = ?
+            """;
+
+        String deleteOrderSql = """
+            DELETE FROM CustomerOrder
+            WHERE idOrder = ?
+            """;
+
+        Connection connection = null;
+        boolean previousAutoCommit = true;
+
+        try {
+            connection = SingletonConnection.getInstance();
+
+            previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement lineStatement = connection.prepareStatement(deleteLineOrdersSql)) {
+                for (Integer idOrder : orderIds) {
+                    lineStatement.setInt(1, idOrder);
+                    lineStatement.addBatch();
+                }
+
+                lineStatement.executeBatch();
+            }
+
+            int deletedRows = 0;
+
+            try (PreparedStatement orderStatement = connection.prepareStatement(deleteOrderSql)) {
+                for (Integer idOrder : orderIds) {
+                    orderStatement.setInt(1, idOrder);
+                    deletedRows += orderStatement.executeUpdate();
+                }
+            }
+
+            if (deletedRows == 0) {
+                throw new OrderException("Aucune commande n'a été supprimée.");
+            }
+
+            connection.commit();
+
+        } catch (OrderException exception) {
+            rollback(connection);
+            throw exception;
+
+        } catch (SQLException | ConnectionException exception) {
+            rollback(connection);
+
+            throw new OrderException(
+                    "Erreur lors de la suppression des commandes.",
                     exception
             );
 

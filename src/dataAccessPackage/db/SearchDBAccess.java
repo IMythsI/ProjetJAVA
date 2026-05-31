@@ -396,4 +396,96 @@ public class SearchDBAccess implements SearchDataAccess {
                 resultSet.getString("allergyLabel")
         );
     }
+
+    @Override
+    public ArrayList<String> getBookingStatusLabels() throws SearchException {
+        String sql = """
+            SELECT statusLabel
+            FROM Status
+            WHERE statusLabel IN ('Reserved', 'Pending', 'Cancelled')
+            ORDER BY CASE statusLabel
+                WHEN 'Reserved' THEN 1
+                WHEN 'Pending' THEN 2
+                WHEN 'Cancelled' THEN 3
+                ELSE 99
+            END
+            """;
+
+        return getStringList(
+                sql,
+                "statusLabel",
+                "Erreur lors du chargement des statuts de réservation."
+        );
+    }
+
+    @Override
+    public ArrayList<String> getTableStatusLabels() throws SearchException {
+        String sql = """
+            SELECT statusLabel
+            FROM Status
+            WHERE statusLabel IN ('Available', 'Reserved', 'Occupied')
+            ORDER BY CASE statusLabel
+                WHEN 'Available' THEN 1
+                WHEN 'Reserved' THEN 2
+                WHEN 'Occupied' THEN 3
+                ELSE 99
+            END
+            """;
+
+        return getStringList(
+                sql,
+                "statusLabel",
+                "Erreur lors du chargement des statuts de table."
+        );
+    }
+
+    @Override
+    public ArrayList<String> getLineOrderStatusLabels() throws SearchException {
+        String sql = """
+            SELECT statusLabel
+            FROM Status
+            WHERE statusLabel IN ('Pending', 'InPreparation', 'Ready', 'Served', 'Cancelled')
+            ORDER BY CASE statusLabel
+                WHEN 'Pending' THEN 1
+                WHEN 'InPreparation' THEN 2
+                WHEN 'Ready' THEN 3
+                WHEN 'Served' THEN 4
+                WHEN 'Cancelled' THEN 5
+                ELSE 99
+            END
+            """;
+
+        return getStringList(
+                sql,
+                "statusLabel",
+                "Erreur lors du chargement des statuts de ligne de commande."
+        );
+    }
+
+    private ArrayList<String> getStringList(
+            String sql,
+            String columnName,
+            String errorMessage
+    ) throws SearchException {
+
+        ArrayList<String> values = new ArrayList<>();
+
+        try {
+            Connection connection = SingletonConnection.getInstance();
+
+            try (
+                    PreparedStatement statement = connection.prepareStatement(sql);
+                    ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    values.add(resultSet.getString(columnName));
+                }
+            }
+
+            return values;
+
+        } catch (SQLException | ConnectionException exception) {
+            throw new SearchException(errorMessage, exception);
+        }
+    }
 }

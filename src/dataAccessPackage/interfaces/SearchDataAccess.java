@@ -25,4 +25,10 @@ public interface SearchDataAccess {
     ArrayList<String> getAllergyLabels() throws SearchException;
 
     ArrayList<ProductSearchResult> searchProductsByTypeAndAllergy(String typeLabel, String allergyLabel) throws SearchException;
+
+    ArrayList<String> getBookingStatusLabels() throws SearchException;
+
+    ArrayList<String> getTableStatusLabels() throws SearchException;
+
+    ArrayList<String> getLineOrderStatusLabels() throws SearchException;
 }

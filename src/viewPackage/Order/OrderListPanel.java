@@ -1,13 +1,17 @@
 package viewPackage.Order;
 
 import controllerPackage.ApplicationController;
+import exceptionPackage.OrderException;
 import modelPackage.Order;
 import viewPackage.MainJFrame;
 import viewPackage.ui.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 
 public class OrderListPanel extends AppPage {
@@ -16,20 +20,23 @@ public class OrderListPanel extends AppPage {
 
     private JPanel resultCard;
     private JPanel resultContentPanel;
+    private JTable orderTable;
+    private ArrayList<Order> currentOrders;
 
     public OrderListPanel(MainJFrame mainWindow) {
         super(mainWindow, true);
 
         controller = new ApplicationController();
+        currentOrders = new ArrayList<>();
 
         addCentered(
-                createPageTitle("Liste des commandes"),
+                createPageTitle("Gestion des commandes"),
                 0,
                 new Insets(0, 0, 12, 0)
         );
 
         addCentered(
-                createPageSubtitle("Consultez toutes les commandes enregistrées"),
+                createPageSubtitle("Tableau de toutes les commandes"),
                 1,
                 new Insets(0, 0, 30, 0)
         );
@@ -58,7 +65,22 @@ public class OrderListPanel extends AppPage {
 
         panel.setOpaque(false);
 
-        JButton refreshButton = ButtonFactory.createPrimaryButton(
+        JButton addButton = ButtonFactory.createPrimaryButton(
+                "Ajouter",
+                () -> mainWindow.showOrderFormPanel()
+        );
+
+        JButton editButton = ButtonFactory.createSecondaryButton(
+                "Modifier",
+                this::editSelectedOrder
+        );
+
+        JButton deleteButton = ButtonFactory.createDangerButton(
+                "Supprimer",
+                this::deleteSelectedOrders
+        );
+
+        JButton refreshButton = ButtonFactory.createSecondaryButton(
                 "Actualiser",
                 this::loadOrders
         );
@@ -68,6 +90,9 @@ public class OrderListPanel extends AppPage {
                 () -> mainWindow.showOrderCardsPanel()
         );
 
+        panel.add(addButton);
+        panel.add(editButton);
+        panel.add(deleteButton);
         panel.add(refreshButton);
         panel.add(currentOrdersButton);
 
@@ -95,7 +120,8 @@ public class OrderListPanel extends AppPage {
         JPanel card = CardFactory.createAdaptiveCard(AppTheme.TABLE_CARD_MAX_WIDTH, 430);
         card.setLayout(new BorderLayout());
 
-        JLabel titleLabel = new JLabel("Commandes");
+        JLabel titleLabel = new JLabel("Commandes enregistrées");
+
         titleLabel.setFont(AppTheme.TEXT_BOLD_FONT);
         titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
@@ -118,7 +144,7 @@ public class OrderListPanel extends AppPage {
         int availableWidth = wrapper.getWidth();
 
         int maxWidth = AppTheme.TABLE_CARD_MAX_WIDTH;
-        int minWidth = 760;
+        int minWidth = 820;
         int horizontalMargin = 40;
 
         int newWidth = Math.min(maxWidth, availableWidth - horizontalMargin);
@@ -144,8 +170,9 @@ public class OrderListPanel extends AppPage {
 
     private void displayOrders(ArrayList<Order> orders) {
         resultContentPanel.removeAll();
+        currentOrders = orders == null ? new ArrayList<>() : orders;
 
-        if (orders == null || orders.isEmpty()) {
+        if (currentOrders.isEmpty()) {
             LoadingHelper.showEmpty(
                     resultContentPanel,
                     "Aucune commande à afficher."
@@ -153,8 +180,8 @@ public class OrderListPanel extends AppPage {
             return;
         }
 
-        JTable table = createOrderTable(orders);
-        JScrollPane scrollPane = new JScrollPane(table);
+        orderTable = createOrderTable(currentOrders);
+        JScrollPane scrollPane = new JScrollPane(orderTable);
 
         resultContentPanel.add(scrollPane, BorderLayout.CENTER);
         resultContentPanel.revalidate();
@@ -201,10 +228,118 @@ public class OrderListPanel extends AppPage {
         table.setFont(AppTheme.TEXT_FONT);
         table.getTableHeader().setFont(AppTheme.TEXT_BOLD_FONT);
         table.getTableHeader().setPreferredSize(new Dimension(0, AppTheme.TABLE_HEADER_HEIGHT));
-        table.setAutoCreateRowSorter(true);
         table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(true);
+        table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         return table;
+    }
+
+    private void editSelectedOrder() {
+        Order selectedOrder = getSingleSelectedOrder();
+
+        if (selectedOrder == null) {
+            return;
+        }
+
+        mainWindow.showOrderEditPanel(selectedOrder);
+    }
+
+    private Order getSingleSelectedOrder() {
+        if (orderTable == null || orderTable.getSelectedRowCount() == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Sélectionnez une commande à modifier.",
+                    "Aucune sélection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return null;
+        }
+
+        if (orderTable.getSelectedRowCount() > 1) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Sélectionnez une seule commande pour la modification.",
+                    "Sélection multiple",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return null;
+        }
+
+        int viewRow = orderTable.getSelectedRow();
+        int modelRow = orderTable.convertRowIndexToModel(viewRow);
+
+        return currentOrders.get(modelRow);
+    }
+
+    private void deleteSelectedOrders() {
+        ArrayList<Integer> selectedOrderIds = getSelectedOrderIds();
+
+        if (selectedOrderIds.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Sélectionnez au moins une commande à supprimer.",
+                    "Aucune sélection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        int confirmation = JOptionPane.showConfirmDialog(
+                this,
+                "Voulez-vous vraiment supprimer " + selectedOrderIds.size() + " commande(s) ?\n" +
+                        "Les lignes de commande liées seront également supprimées.",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirmation != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            controller.deleteOrders(selectedOrderIds);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "La suppression a bien été effectuée.",
+                    "Suppression réussie",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            loadOrders();
+
+        } catch (OrderException exception) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    exception.getMessage(),
+                    "Erreur de suppression",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private ArrayList<Integer> getSelectedOrderIds() {
+        ArrayList<Integer> ids = new ArrayList<>();
+
+        if (orderTable == null) {
+            return ids;
+        }
+
+        int[] selectedRows = orderTable.getSelectedRows();
+
+        for (int viewRow : selectedRows) {
+            int modelRow = orderTable.convertRowIndexToModel(viewRow);
+            Order order = currentOrders.get(modelRow);
+
+            ids.add(order.getIdOrder());
+        }
+
+        return ids;
     }
 
     private void displayLoadingError(Exception exception) {

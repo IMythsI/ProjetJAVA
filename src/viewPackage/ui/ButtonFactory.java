@@ -35,6 +35,19 @@ public final class ButtonFactory {
         return button;
     }
 
+    public static JButton createDangerButton(String text, Runnable action) {
+        JButton button = new RoundedButton(text, AppTheme.BUTTON_ARC);
+
+        applyBaseButtonStyle(button, AppTheme.SECONDARY_BUTTON_SIZE);
+        button.setFont(AppTheme.BUTTON_FONT);
+        button.setForeground(Color.WHITE);
+        button.setBackground(AppTheme.DANGER);
+
+        addAction(button, action);
+
+        return button;
+    }
+
     public static JButton createBackButton(Runnable action) {
         JButton button = new RoundedButton("← Retour", AppTheme.SMALL_BUTTON_ARC);
 

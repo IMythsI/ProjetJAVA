@@ -86,7 +86,17 @@ public class ProductSelectionPanel extends AppPage {
             return "Commande à emporter";
         }
 
-        return "Commande pour la table " + table.getIdTable();
+        Table selectedTable = table;
+
+        if (selectedTable == null) {
+            selectedTable = order.getTable();
+        }
+
+        if (selectedTable != null) {
+            return "Commande pour la table " + selectedTable.getIdTable();
+        }
+
+        return "Commande sur place";
     }
 
     private Order createTableOrder(Table table) {
@@ -564,7 +574,7 @@ public class ProductSelectionPanel extends AppPage {
                 JOptionPane.INFORMATION_MESSAGE
         );
 
-        mainWindow.goBack();
+        mainWindow.showOrderListPanel();
     }
 
     private void displayValidationError(Exception exception) {

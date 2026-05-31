@@ -58,6 +58,18 @@ public class OrderManager {
             throw new OrderException("Le type de commande est obligatoire.");
         }
 
+        if (order.getComment() != null && order.getComment().length() > 100) {
+            throw new OrderException("Le commentaire ne peut pas dépasser 100 caractères.");
+        }
+
+        if (order.getNameCustomer() != null && order.getNameCustomer().length() > 50) {
+            throw new OrderException("Le nom du client ne peut pas dépasser 50 caractères.");
+        }
+
+        if (order.getTelCustomer() != null && order.getTelCustomer().length() > 20) {
+            throw new OrderException("Le numéro de téléphone ne peut pas dépasser 20 caractères.");
+        }
+
         if (order.getIsTakeAway()) {
             validateTakeAwayOrder(order);
         } else {
@@ -130,5 +142,34 @@ public class OrderManager {
         validateId(idOrder, "La commande sélectionnée est invalide.");
 
         orderDAO.deleteOrder(idOrder);
+    }
+
+    public void addOrder(Order order) throws OrderException {
+        validateOrderHeader(order);
+
+        orderDAO.addOrder(order);
+    }
+
+    public void updateOrder(Order order) throws OrderException {
+        if (order == null) {
+            throw new OrderException("La commande est invalide.");
+        }
+
+        validateId(order.getIdOrder(), "La commande sélectionnée est invalide.");
+        validateOrderHeader(order);
+
+        orderDAO.updateOrder(order);
+    }
+
+    public void deleteOrders(ArrayList<Integer> orderIds) throws OrderException {
+        if (orderIds == null || orderIds.isEmpty()) {
+            throw new OrderException("Aucune commande n'a été sélectionnée.");
+        }
+
+        for (Integer idOrder : orderIds) {
+            validateId(idOrder, "Une commande sélectionnée est invalide.");
+        }
+
+        orderDAO.deleteOrders(orderIds);
     }
 }

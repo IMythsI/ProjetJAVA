@@ -114,6 +114,18 @@ public class ApplicationController {
         orderManager.deleteOrder(idOrder);
     }
 
+    public void addOrder(Order order) throws OrderException {
+        orderManager.addOrder(order);
+    }
+
+    public void updateOrder(Order order) throws OrderException {
+        orderManager.updateOrder(order);
+    }
+
+    public void deleteOrders(ArrayList<Integer> orderIds) throws OrderException {
+        orderManager.deleteOrders(orderIds);
+    }
+
     //LINE ORDER
     public ArrayList<LineOrder> getLineOrdersByTable(Integer idTable)
             throws LineOrderException {
@@ -158,6 +170,18 @@ public class ApplicationController {
     ) throws SearchException {
 
         return searchManager.searchOrdersByWaiterAndStatus(waiterName, statusLabel);
+    }
+
+    public ArrayList<String> getBookingStatusLabels() throws SearchException {
+        return searchManager.getBookingStatusLabels();
+    }
+
+    public ArrayList<String> getTableStatusLabels() throws SearchException {
+        return searchManager.getTableStatusLabels();
+    }
+
+    public ArrayList<String> getLineOrderStatusLabels() throws SearchException {
+        return searchManager.getLineOrderStatusLabels();
     }
 
     public ArrayList<String> getProductTypes() throws SearchException {

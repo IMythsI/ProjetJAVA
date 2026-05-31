@@ -85,4 +85,16 @@ public class SearchManager {
 
         return searchDAO.searchProductsByTypeAndAllergy(typeLabel, allergyLabel);
     }
+
+    public ArrayList<String> getBookingStatusLabels() throws SearchException {
+        return searchDAO.getBookingStatusLabels();
+    }
+
+    public ArrayList<String> getTableStatusLabels() throws SearchException {
+        return searchDAO.getTableStatusLabels();
+    }
+
+    public ArrayList<String> getLineOrderStatusLabels() throws SearchException {
+        return searchDAO.getLineOrderStatusLabels();
+    }
 }
