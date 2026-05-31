@@ -14,12 +14,7 @@ public final class FormFactory {
 
     }
 
-    /*
-     * ============================================================
-     * TEXT FIELD
-     * ============================================================
-     */
-
+    //TEXT FIELD
     public static JTextField createTextField() {
         JTextField field = new JTextField();
 
@@ -28,12 +23,7 @@ public final class FormFactory {
         return field;
     }
 
-    /*
-     * ============================================================
-     * TEXT AREA
-     * ============================================================
-     */
-
+    //TEXT AREA
     public static JTextArea createTextArea() {
         JTextArea area = new JTextArea();
 
@@ -59,12 +49,7 @@ public final class FormFactory {
         return scrollPane;
     }
 
-    /*
-     * ============================================================
-     * COMBO BOX
-     * ============================================================
-     */
-
+    //COMBOBOx
     public static JComboBox<String> createComboBox() {
         JComboBox<String> comboBox = new JComboBox<>();
 
@@ -81,12 +66,7 @@ public final class FormFactory {
         return comboBox;
     }
 
-    /*
-     * ============================================================
-     * SPINNER
-     * ============================================================
-     */
-
+    //SPINNER
     public static JSpinner createNumberSpinner(int min, int max, int value) {
         JSpinner spinner = new JSpinner(
                 new SpinnerNumberModel(value, min, max, 1)
@@ -107,12 +87,7 @@ public final class FormFactory {
         return spinner;
     }
 
-    /*
-     * ============================================================
-     * FORM ROW
-     * ============================================================
-     */
-
+    //FORM ROW
     public static void addFormRow(JPanel panel,
                                   GridBagConstraints constraints,
                                   int row,
@@ -160,12 +135,7 @@ public final class FormFactory {
         return label;
     }
 
-    /*
-     * ============================================================
-     * DATE PANEL
-     * ============================================================
-     */
-
+    //DATE PANEL
     public static JPanel createThreeColumnPanel(JComponent first,
                                                 JComponent second,
                                                 JComponent third) {
@@ -180,12 +150,7 @@ public final class FormFactory {
         return panel;
     }
 
-    /*
-     * ============================================================
-     * STYLE HELPERS
-     * ============================================================
-     */
-
+    //STYLE
     private static void applyTextComponentStyle(JTextField field) {
         field.setPreferredSize(AppTheme.FIELD_SIZE);
         field.setMinimumSize(new Dimension(250, AppTheme.FIELD_HEIGHT));

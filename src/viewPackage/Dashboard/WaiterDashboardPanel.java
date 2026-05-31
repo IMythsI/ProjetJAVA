@@ -108,24 +108,4 @@ public class WaiterDashboardPanel extends AppPage {
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
-
-    private JPanel createInformationCard() {
-        JPanel card = CardFactory.createCard(720, 120);
-        card.setLayout(new BorderLayout());
-
-        JLabel titleLabel = new JLabel("Actions disponibles");
-        titleLabel.setFont(AppTheme.TEXT_BOLD_FONT);
-        titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
-
-        JLabel descriptionLabel = new JLabel(
-                "Utilisez les cartes ci-dessus pour accéder rapidement aux fonctionnalités principales du serveur."
-        );
-        descriptionLabel.setFont(AppTheme.TEXT_FONT);
-        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
-
-        card.add(titleLabel, BorderLayout.NORTH);
-        card.add(descriptionLabel, BorderLayout.CENTER);
-
-        return card;
-    }
 }

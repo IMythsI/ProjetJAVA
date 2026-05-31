@@ -19,12 +19,7 @@ import java.util.ArrayList;
 
 public class SearchDBAccess implements SearchDataAccess {
 
-    /*
-     * ============================================================
-     * SEARCH 1 - BOOKINGS BY CUSTOMER AND DATE
-     * ============================================================
-     */
-
+    //SEARCH 1
     @Override
     public ArrayList<String> getBookingCustomerNames() throws SearchException {
         ArrayList<String> customerNames = new ArrayList<>();
@@ -121,12 +116,7 @@ public class SearchDBAccess implements SearchDataAccess {
         );
     }
 
-    /*
-     * ============================================================
-     * SEARCH 2 - ORDERS BY EMPLOYEE AND STATUS
-     * ============================================================
-     */
-
+    //SEARCH 2
     @Override
     public ArrayList<String> getWaiterNames() throws SearchException {
         ArrayList<String> employeeNames = new ArrayList<>();
@@ -274,12 +264,7 @@ public class SearchDBAccess implements SearchDataAccess {
         );
     }
 
-    /*
-     * ============================================================
-     * SEARCH 3 - PRODUCTS BY TYPE AND ALLERGY
-     * ============================================================
-     */
-
+    //SEARCH 3
     @Override
     public ArrayList<String> getProductTypes() throws SearchException {
         ArrayList<String> types = new ArrayList<>();

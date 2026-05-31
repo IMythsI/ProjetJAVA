@@ -9,12 +9,7 @@ public final class TableFactory {
         // Utility class
     }
 
-    /*
-     * ============================================================
-     * CARD
-     * ============================================================
-     */
-
+    //CARD
     public static JPanel createTableCard(int width, int minHeight) {
         JPanel card = CardFactory.createAdaptiveCard(width, minHeight);
 
@@ -32,12 +27,7 @@ public final class TableFactory {
         return card;
     }
 
-    /*
-     * ============================================================
-     * HEADER ROW
-     * ============================================================
-     */
-
+    //HEADER ROW
     public static JPanel createHeaderRow(String... columns) {
         JPanel header = new JPanel(new GridLayout(
                 1,
@@ -82,12 +72,7 @@ public final class TableFactory {
         return label;
     }
 
-    /*
-     * ============================================================
-     * DATA ROW
-     * ============================================================
-     */
-
+    //DATA ROW
     public static JPanel createDataRow(Component... components) {
         JPanel container = new JPanel(new BorderLayout());
 
@@ -136,12 +121,7 @@ public final class TableFactory {
         return wrapper;
     }
 
-    /*
-     * ============================================================
-     * CELL
-     * ============================================================
-     */
-
+    //CELL
     public static JLabel createCellLabel(String text, Color color) {
         JLabel label = new JLabel(text == null ? "-" : text);
 
@@ -161,12 +141,7 @@ public final class TableFactory {
         return label;
     }
 
-    /*
-     * ============================================================
-     * ACTIONS
-     * ============================================================
-     */
-
+    //ACTIONS
     public static JPanel createActionPanel(JButton... buttons) {
         JPanel panel = new JPanel(new FlowLayout(
                 FlowLayout.LEFT,
@@ -183,12 +158,7 @@ public final class TableFactory {
         return panel;
     }
 
-    /*
-     * ============================================================
-     * SEPARATOR
-     * ============================================================
-     */
-
+    //SEPARATOR
     public static JSeparator createSeparator() {
         JSeparator separator = new JSeparator();
 
@@ -199,12 +169,7 @@ public final class TableFactory {
         return separator;
     }
 
-    /*
-     * ============================================================
-     * ADAPTIVE SIZE
-     * ============================================================
-     */
-
+    //ADAPTIVE SIZE
     public static void updateAdaptiveTableCardSize(JPanel card, int rowCount) {
         int safeRowCount = Math.max(rowCount, 1);
 

@@ -11,12 +11,7 @@ public final class StatusHelper {
         // Utility class
     }
 
-    /*
-     * ============================================================
-     * STATUS COLORS
-     * ============================================================
-     */
-
+    //STATUS COLORS
     public static Color getStatusColor(String status) {
         if (status == null || status.isBlank()) {
             return AppTheme.TEXT_SECONDARY;
@@ -42,12 +37,7 @@ public final class StatusHelper {
         };
     }
 
-    /*
-     * ============================================================
-     * STATUS TRANSLATIONS
-     * ============================================================
-     */
-
+    //STATUS TRANSLATIONS
     public static String getFrenchStatus(String status) {
         if (status == null || status.isBlank()) {
             return "Inconnu";
@@ -77,12 +67,7 @@ public final class StatusHelper {
         return getFrenchStatus(status);
     }
 
-    /*
-     * ============================================================
-     * TEXT COLOR
-     * ============================================================
-     */
-
+    //TEXT COLOR
     public static Color getTextColorForStatus(String status) {
         Color backgroundColor = getStatusColor(status);
 
@@ -101,12 +86,7 @@ public final class StatusHelper {
                 + color.getBlue() * 114) / 1000;
     }
 
-    /*
-     * ============================================================
-     * ORDER HELPERS
-     * ============================================================
-     */
-
+    //ORDER HELPERS
     public static boolean isOrderFinished(ArrayList<LineOrder> lines) {
         if (lines == null || lines.isEmpty()) {
             return false;

@@ -11,23 +11,13 @@ public final class LoadingHelper {
         // Utility class
     }
 
-    /*
-     * ============================================================
-     * FUNCTIONAL INTERFACES
-     * ============================================================
-     */
-
+    //FUNCTIONAL INTERFACES
     @FunctionalInterface
     public interface BackgroundTask<T> {
         T execute() throws Exception;
     }
 
-    /*
-     * ============================================================
-     * BACKGROUND EXECUTION
-     * ============================================================
-     */
-
+    //BACKGROUND EXECUTION
     public static <T> void runWithLoading(JPanel targetPanel,
                                           String loadingMessage,
                                           BackgroundTask<T> backgroundTask,
@@ -76,12 +66,7 @@ public final class LoadingHelper {
         return exception;
     }
 
-    /*
-     * ============================================================
-     * STATES
-     * ============================================================
-     */
-
+    //STATES
     public static void showLoading(JPanel panel, String message) {
         panel.removeAll();
 
@@ -142,12 +127,7 @@ public final class LoadingHelper {
         refresh(panel);
     }
 
-    /*
-     * ============================================================
-     * UI HELPERS
-     * ============================================================
-     */
-
+    //UI HELPERS
     private static JPanel createStatePanel(String message, Color color, boolean withSpinner) {
         JPanel panel = new JPanel(new GridBagLayout());
 

@@ -233,10 +233,6 @@ public class OrderSearchPanel extends AppPage {
         waiterComboBox.setEnabled(true);
         statusComboBox.setEnabled(true);
 
-        /*
-         * On garde les valeurs SQL anglaises dans une liste interne simple :
-         * l'index sélectionné dans la comboBox correspond au même index dans criteria.statuses.
-         */
         statusComboBox.putClientProperty("databaseStatuses", criteria.getStatuses());
 
         LoadingHelper.showEmpty(
@@ -296,7 +292,6 @@ public class OrderSearchPanel extends AppPage {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String getSelectedDatabaseStatus() {
         Object property = statusComboBox.getClientProperty("databaseStatuses");
 
