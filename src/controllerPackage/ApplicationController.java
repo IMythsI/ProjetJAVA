@@ -80,6 +80,14 @@ public class ApplicationController {
         tableManager.updateTableStatus(idTable, statusLabel);
     }
 
+    public void addTable(Table table) throws TableException {
+        tableManager.addTable(table);
+    }
+
+    public void deleteTable(Integer idTable) throws TableException {
+        tableManager.deleteTable(idTable);
+    }
+
     //PRODUCT
     public ArrayList<Product> getAllProducts() throws ProductException {
         return productManager.getAllProducts();

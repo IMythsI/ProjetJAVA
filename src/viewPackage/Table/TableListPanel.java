@@ -39,14 +39,20 @@ public class TableListPanel extends AppPage {
         );
 
         addCentered(
-                createTablesCardWrapper(),
+                createActionPanel(),
                 2,
                 new Insets(0, 0, 25, 0)
         );
 
         addCentered(
-                createLegendPanel(),
+                createTablesCardWrapper(),
                 3,
+                new Insets(0, 0, 25, 0)
+        );
+
+        addCentered(
+                createLegendPanel(),
+                4,
                 new Insets(0, 0, 0, 0)
         );
 
@@ -95,6 +101,34 @@ public class TableListPanel extends AppPage {
         card.add(tablesContentPanel, BorderLayout.CENTER);
 
         return card;
+    }
+
+    private JPanel createActionPanel() {
+        JPanel panel = new JPanel(new FlowLayout(
+                FlowLayout.CENTER,
+                AppTheme.COMPONENT_GAP_MEDIUM,
+                0
+        ));
+
+        panel.setOpaque(false);
+
+        JButton addButton = ButtonFactory.createPrimaryButton(
+                "+ Ajouter une table",
+                () -> mainWindow.showTableFormPanel()
+        );
+
+        JButton refreshButton = ButtonFactory.createSecondaryButton(
+                "Actualiser",
+                this::loadTables
+        );
+
+        addButton.setPreferredSize(new Dimension(220, AppTheme.BUTTON_HEIGHT));
+        refreshButton.setPreferredSize(new Dimension(160, AppTheme.BUTTON_HEIGHT));
+
+        panel.add(addButton);
+        panel.add(refreshButton);
+
+        return panel;
     }
 
     private void resizeTablesCard(JPanel wrapper) {

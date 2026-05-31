@@ -134,6 +134,11 @@ public class TableDetailPanel extends AppPage {
         buttonPanel.setOpaque(false);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 20));
 
+        JButton deleteTableButton = ButtonFactory.createSecondaryButton(
+                "Supprimer",
+                this::confirmAndDeleteTable
+        );
+
         JButton createOrderButton = ButtonFactory.createSecondaryButton(
                 "Créer une commande",
                 () -> mainWindow.showProductSelectionPanel(table)
@@ -144,9 +149,13 @@ public class TableDetailPanel extends AppPage {
                 this::updateStatus
         );
 
+        deleteTableButton.setForeground(AppTheme.DANGER);
+
+        deleteTableButton.setPreferredSize(new Dimension(150, AppTheme.BUTTON_HEIGHT));
         createOrderButton.setPreferredSize(new Dimension(210, AppTheme.BUTTON_HEIGHT));
         saveStatusButton.setPreferredSize(new Dimension(210, AppTheme.BUTTON_HEIGHT));
 
+        buttonPanel.add(deleteTableButton);
         buttonPanel.add(createOrderButton);
         buttonPanel.add(saveStatusButton);
 
@@ -312,6 +321,62 @@ public class TableDetailPanel extends AppPage {
                     JOptionPane.WARNING_MESSAGE
             );
         }
+    }
+
+    private void confirmAndDeleteTable() {
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Voulez-vous vraiment supprimer la table "
+                        + table.getIdTable()
+                        + " ?\nLa suppression sera refusée si la table est liée à une réservation ou une commande.",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (choice != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        deleteTable();
+    }
+
+    private void deleteTable() {
+        LoadingHelper.runWithLoading(
+                ordersContentPanel,
+                "Suppression de la table...",
+                () -> {
+                    controller.deleteTable(table.getIdTable());
+                    return null;
+                },
+                ignored -> {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "La table a bien été supprimée.",
+                            "Suppression réussie",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    mainWindow.showTableListPanel();
+                },
+                this::displayDeleteError
+        );
+    }
+
+    private void displayDeleteError(Exception exception) {
+        LoadingHelper.showError(
+                ordersContentPanel,
+                "Impossible de supprimer la table."
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Erreur de suppression",
+                JOptionPane.ERROR_MESSAGE
+        );
+
+        loadTableLineOrdersIfOccupied();
     }
 
     private void loadTableLineOrdersIfOccupied() {

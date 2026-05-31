@@ -24,6 +24,7 @@ import viewPackage.Search.BookingSearchPanel;
 import viewPackage.Search.OrderSearchPanel;
 import viewPackage.Search.ProductSearchPanel;
 import viewPackage.Table.TableDetailPanel;
+import viewPackage.Table.TableFormPanel;
 import viewPackage.Table.TableListPanel;
 import viewPackage.ui.AppTheme;
 
@@ -202,7 +203,13 @@ public class MainJFrame extends JFrame {
                 event -> showTableListPanel()
         );
 
+        JMenuItem addTableItem = createMenuItem(
+                "Ajouter une table",
+                event -> showTableFormPanel()
+        );
+
         tableMenu.add(listTablesItem);
+        tableMenu.add(addTableItem);
 
         return tableMenu;
     }
@@ -360,8 +367,11 @@ public class MainJFrame extends JFrame {
         changePanel(new TableDetailPanel(this, table));
     }
 
+    public void showTableFormPanel() {
+        changePanel(new TableFormPanel(this));
+    }
 
-
+    //OTHER
     public void showAllergiesPanel() {
         showProductSearchPanel();
     }

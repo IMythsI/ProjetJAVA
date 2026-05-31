@@ -19,11 +19,47 @@ public class TableManager {
         return tableDAO.getAllTables();
     }
 
+    public void addTable(Table table) throws TableException {
+        validateTable(table);
+
+        tableDAO.addTable(table);
+    }
+
     public void updateTableStatus(Integer idTable, String statusLabel) throws TableException {
         validateTableId(idTable);
         validateTableStatus(statusLabel);
 
         tableDAO.updateTableStatus(idTable, statusLabel);
+    }
+
+    public void deleteTable(Integer idTable) throws TableException {
+        validateTableId(idTable);
+
+        if (tableDAO.isTableUsed(idTable)) {
+            throw new TableException(
+                    "Impossible de supprimer cette table : elle est liée à une réservation ou à une commande."
+            );
+        }
+
+        tableDAO.deleteTable(idTable);
+    }
+
+    private void validateTable(Table table) throws TableException {
+        if (table == null) {
+            throw new TableException("La table est invalide.");
+        }
+
+        validateTableId(table.getIdTable());
+
+        if (table.getNbSeats() == null || table.getNbSeats() <= 0) {
+            throw new TableException("Le nombre de places doit être supérieur à 0.");
+        }
+
+        if (table.getStatus() == null) {
+            throw new TableException("Le statut de la table est obligatoire.");
+        }
+
+        validateTableStatus(table.getStatus().getStatusLabel());
     }
 
     private void validateTableId(Integer idTable) throws TableException {
