@@ -13,23 +13,6 @@ Ce projet a été réalisé dans le cadre du cours de développement d’applica
 | Degand | Mathys | etu57241@henallux.be |
 | Tran | Leny | etu53209@henallux.be |
 
----
 
-## Lancement du projet
-La version de java utilisée est :
-```txt
-java 26 Oracle OpenJDK 26
-```
-
-L’application utilise des variables d’environnement pour se connecter à la base de données (normalement déjà enregistrées) :
-```txt
-PROJETJAVA_DB_URL = jdbc:mariadb://mysql-projetjava.alwaysdata.net:3306/projetjava_bd;
-PROJETJAVA_DB_USER = projetjava
-PROJETJAVA_DB_PASSWORD = ML_Java;
-```
-
-Pour accéder à la version de java et varaible d'environement :
-```txt
-Run (déroulant à coté du bouton lancement) > Edit Configurations
-```
+Les informations de lancement sont données dans le dossier partager sur moodle ("information.txt")
 ---
