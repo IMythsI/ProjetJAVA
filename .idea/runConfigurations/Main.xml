@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="ALTERNATIVE_JRE_PATH" value="26" />
+    <envs>
+      <env name="PROJETJAVA_DB_PASSWORD" value="$PROJETJAVA_DB_PASSWORD$" />
+      <env name="PROJETJAVA_DB_URL" value="$PROJETJAVA_DB_URL$" />
+      <env name="PROJETJAVA_DB_USER" value="$PROJETJAVA_DB_USER$" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="Main" />
+    <module name="$PROJETJAVA_DB_USER$" />
+    <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
