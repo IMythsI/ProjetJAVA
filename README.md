@@ -18,10 +18,10 @@ Ce projet a été réalisé dans le cadre du cours de développement d’applica
 ## Lancement du projet
 La version de java utilisée est :
 ```txt
-java 26 SDK of 'ProjetJAVA' modude
+java 26 Oracle OpenJDK 26
 ```
 
-L’application utilise des variables d’environnement pour se connecter à la base de données :
+L’application utilise des variables d’environnement pour se connecter à la base de données (normalement déjà enregistrées) :
 ```txt
 PROJETJAVA_DB_URL = jdbc:mariadb://mysql-projetjava.alwaysdata.net:3306/projetjava_bd;
 PROJETJAVA_DB_USER = projetjava
