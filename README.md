@@ -13,6 +13,8 @@ Ce projet a été réalisé dans le cadre du cours de développement d’applica
 | Degand | Mathys | etu57241@henallux.be |
 | Tran | Leny | etu53209@henallux.be |
 
-
+--- 
+## Information
 Les informations de lancement sont données dans le dossier partager sur moodle ("information.txt")
+
 ---
